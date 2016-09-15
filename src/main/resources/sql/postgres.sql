@@ -1,4 +1,4 @@
-DROP TABLE Opiskelija;
+DROP TABLE IF EXISTS Opiskelija;
 
 CREATE TABLE Opiskelija (id SERIAL PRIMARY KEY, nimi VARCHAR(255));
 
