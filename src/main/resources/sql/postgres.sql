@@ -1,0 +1,2 @@
+CREATE TABLE Opiskelija (id SERIAL PRIMARY KEY, nimi VARCHAR(255));
+
