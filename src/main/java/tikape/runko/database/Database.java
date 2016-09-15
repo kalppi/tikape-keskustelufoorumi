@@ -37,13 +37,11 @@ public class Database {
             System.out.println("Error >> " + t.getMessage());
         }
     }
-
-    private List<String> sqliteLauseet() {
-        ArrayList<String> lista = new ArrayList<>();
-        
+    
+    private void lueLauseet(ArrayList<String> lista, String tiedosto) {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         
-        try(InputStream stream = classloader.getResourceAsStream("sql/lauseet.sql")) {
+        try(InputStream stream = classloader.getResourceAsStream(tiedosto)) {
             Scanner reader = new Scanner(stream);
             while(reader.hasNextLine()) {
                 String line = reader.nextLine();
@@ -54,6 +52,18 @@ public class Database {
         } catch (IOException e) {
             
         }
+    }
+
+    private List<String> sqliteLauseet() {
+        ArrayList<String> lista = new ArrayList<>();
+        
+        String tyyppi = "sqlite";
+        if(this.databaseAddress.contains("postgres")) {
+            tyyppi = "postgres";
+        }
+        
+        lueLauseet(lista, "sql/" + tyyppi + ".sql");
+        lueLauseet(lista, "sql/molemmat.sql");
         
         return lista;
     }

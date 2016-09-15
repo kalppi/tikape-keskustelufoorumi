@@ -11,16 +11,19 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         int port = 4567;
+        String jdbcOsoite = "jdbc:sqlite:opiskelijat.db";
         
         //herokua varten
         if(System.getenv("PORT") != null) {
             port = Integer.parseInt(System.getenv("PORT"));
         }
+        if (System.getenv("DATABASE_URL") != null) {
+            jdbcOsoite = System.getenv("DATABASE_URL");
+        } 
         
         port(port);
         
-        
-        Database database = new Database("jdbc:sqlite:opiskelijat.db");
+        Database database = new Database(jdbcOsoite);
         database.init();
 
         OpiskelijaDao opiskelijaDao = new OpiskelijaDao(database);
