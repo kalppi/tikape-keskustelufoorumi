@@ -11,6 +11,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         int port = 4567;
+        
+        //herokua varten
         if(System.getenv("PORT") != null) {
             port = Integer.parseInt(System.getenv("PORT"));
         }
