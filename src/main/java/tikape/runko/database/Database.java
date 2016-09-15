@@ -8,15 +8,22 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Database {
-
     private String databaseAddress;
+    private String username;
+    private String password;
 
     public Database(String databaseAddress) throws ClassNotFoundException {
         this.databaseAddress = databaseAddress;
     }
+    
+    public Database(String databaseAddress, String username, String password) {
+        this.databaseAddress = databaseAddress;
+        this.username = username;
+        this.password = password;
+    }
 
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(databaseAddress);
+        return DriverManager.getConnection(this.databaseAddress, this.username, this.password);
     }
 
     public void init() {

@@ -1,5 +1,6 @@
 package tikape.runko;
 
+import java.net.URI;
 import java.util.HashMap;
 import spark.ModelAndView;
 import static spark.Spark.*;
@@ -12,18 +13,24 @@ public class Main {
     public static void main(String[] args) throws Exception {
         int port = 4567;
         String jdbcOsoite = "jdbc:sqlite:opiskelijat.db";
+        String username = "";
+        String password = "";
         
         //herokua varten
         if(System.getenv("PORT") != null) {
             port = Integer.parseInt(System.getenv("PORT"));
         }
-        if (System.getenv("DATABASE_URL") != null) {
-            jdbcOsoite = System.getenv("DATABASE_URL");
+        if (System.getenv("DATABASE_URL") != null) {            
+            URI dbUri = new URI(System.getenv("DATABASE_URL"));
+
+            username = dbUri.getUserInfo().split(":")[0];
+            password = dbUri.getUserInfo().split(":")[1];
+            jdbcOsoite = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
         } 
         
         port(port);
         
-        Database database = new Database(jdbcOsoite);
+        Database database = new Database(jdbcOsoite, username, password);
         database.init();
 
         OpiskelijaDao opiskelijaDao = new OpiskelijaDao(database);
