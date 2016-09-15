@@ -1,3 +1,6 @@
+-- laitetaan foreign key supportti päälle
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE Opiskelija (id integer PRIMARY KEY, nimi varchar(255));
 
 INSERT INTO Opiskelija (nimi) VALUES ('Platon');)
