@@ -50,11 +50,19 @@ public class Database {
         
         try(InputStream stream = classloader.getResourceAsStream(tiedosto)) {
             Scanner reader = new Scanner(stream);
+            StringBuilder lines = new StringBuilder();
+            
             while(reader.hasNextLine()) {
                 String line = reader.nextLine();
                 if(!line.isEmpty()) {
-                    lista.add(line);
+                    if(!line.startsWith("--")) {
+                        lines.append(line);
+                    }
                 }
+            }
+            
+            for(String line : lines.toString().split(";")) {
+                lista.add(line);
             }
         } catch (IOException e) {
             

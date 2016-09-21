@@ -14,7 +14,6 @@ import java.util.List;
 import tikape.runko.domain.Opiskelija;
 
 public class OpiskelijaDao implements Dao<Opiskelija, Integer> {
-
     private Database database;
 
     public OpiskelijaDao(Database database) {
