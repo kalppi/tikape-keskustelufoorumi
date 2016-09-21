@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         int port = 4567;
-        String jdbcOsoite = "jdbc:sqlite:opiskelijat.db";
+        String jdbcOsoite = "jdbc:sqlite:keskustelufoorumi.db";
         String username = "";
         String password = "";
         
