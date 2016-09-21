@@ -27,7 +27,7 @@ public class Main {
             password = dbUri.getUserInfo().split(":")[1];
             jdbcOsoite = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
         } 
-        
+        //sakjhfdsad
         port(port);
         
         Database database = new Database(jdbcOsoite, username, password);
