@@ -21,7 +21,8 @@ public class Database {
         this.username = username;
         this.password = password;
     }
-
+    
+    // tähän olisi hyvä jonkinlainen connection pooli, mutta varmaan turhan overkilli nyt
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(this.databaseAddress, this.username, this.password);
     }

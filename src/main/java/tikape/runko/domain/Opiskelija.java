@@ -1,7 +1,6 @@
 package tikape.runko.domain;
 
 public class Opiskelija {
-
     private Integer id;
     private String nimi;
 
@@ -25,5 +24,9 @@ public class Opiskelija {
     public void setNimi(String nimi) {
         this.nimi = nimi;
     }
-
+    
+    @Override
+    public String toString() {
+        return "[" + this.id + "/" + this.nimi + "]";
+    }
 }

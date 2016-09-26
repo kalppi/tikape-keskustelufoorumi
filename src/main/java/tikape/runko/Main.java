@@ -7,9 +7,10 @@ import static spark.Spark.*;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
 import tikape.runko.database.Database;
 import tikape.runko.database.OpiskelijaDao;
+import tikape.runko.database.ViestiDao;
+import tikape.runko.domain.Viesti;
 
 public class Main {
-
     public static void main(String[] args) throws Exception {
         int port = 4567;
         String jdbcOsoite = "jdbc:sqlite:keskustelufoorumi.db";
@@ -27,7 +28,7 @@ public class Main {
             password = dbUri.getUserInfo().split(":")[1];
             jdbcOsoite = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
         } 
-        //sakjhfdsad
+        
         port(port);
         
         Database database = new Database(jdbcOsoite, username, password);
@@ -55,5 +56,10 @@ public class Main {
 
             return new ModelAndView(map, "opiskelija");
         }, new ThymeleafTemplateEngine());
+
+        Thread.sleep(1000);
+        
+        TextUI tui = new TextUI(database);
+        tui.start();
     }
 }
