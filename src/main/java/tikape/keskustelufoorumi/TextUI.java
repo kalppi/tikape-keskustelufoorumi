@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.runko;
+package tikape.keskustelufoorumi;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import tikape.runko.database.Dao;
-import tikape.runko.database.Database;
-import tikape.runko.database.ViestiDao;
-import tikape.runko.domain.Viesti;
+import tikape.keskustelufoorumi.database.Dao;
+import tikape.keskustelufoorumi.database.Database;
+import tikape.keskustelufoorumi.database.ViestiDao;
+import tikape.keskustelufoorumi.domain.Viesti;
 
 public class TextUI implements UI {
     private Database database;

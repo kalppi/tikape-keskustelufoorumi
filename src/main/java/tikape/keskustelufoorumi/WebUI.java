@@ -3,16 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.runko;
+package tikape.keskustelufoorumi;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import spark.ModelAndView;
 import static spark.Spark.get;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
-import tikape.runko.database.Dao;
-import tikape.runko.database.Database;
-import tikape.runko.database.OpiskelijaDao;
+import tikape.keskustelufoorumi.database.Dao;
+import tikape.keskustelufoorumi.database.Database;
+import tikape.keskustelufoorumi.database.OpiskelijaDao;
+import tikape.keskustelufoorumi.domain.Alue;
 
 public class WebUI implements UI {
     private Database database;
@@ -28,7 +31,7 @@ public class WebUI implements UI {
     
     public void start() {
         get("/", (req, res) -> {
-            HashMap map = new HashMap<>();
+            HashMap map = new HashMap<>();            
             map.put("viesti", "tervehdys");
 
             return new ModelAndView(map, "index");

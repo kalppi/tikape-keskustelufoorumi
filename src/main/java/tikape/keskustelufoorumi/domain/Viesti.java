@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.runko.domain;
+package tikape.keskustelufoorumi.domain;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

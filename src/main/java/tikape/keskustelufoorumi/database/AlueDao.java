@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.runko.database;
+package tikape.keskustelufoorumi.database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import tikape.runko.domain.Opiskelija;
+import tikape.keskustelufoorumi.domain.Opiskelija;
 
 public class AlueDao implements Dao<Opiskelija, Integer> {
     private Database database;

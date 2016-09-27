@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.runko;
+package tikape.keskustelufoorumi;
 
-import tikape.runko.database.Database;
+import java.sql.SQLException;
+import tikape.keskustelufoorumi.database.Database;
 
 public interface UI {
-    void init();
+    void init() throws SQLException;
     void start();
 }

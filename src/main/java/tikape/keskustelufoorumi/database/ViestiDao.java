@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.runko.database;
+package tikape.keskustelufoorumi.database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import tikape.runko.domain.Opiskelija;
-import tikape.runko.domain.Viesti;
-import tikape.runko.database.StatementBuilder;
+import tikape.keskustelufoorumi.domain.Opiskelija;
+import tikape.keskustelufoorumi.domain.Viesti;
+import tikape.keskustelufoorumi.database.StatementBuilder;
 
 
 public class ViestiDao implements Dao<Viesti, Integer> {

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.runko.database;
+package tikape.keskustelufoorumi.database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,8 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.TimeZone;
-import tikape.runko.domain.Opiskelija;
-import tikape.runko.domain.Viesti;
+import tikape.keskustelufoorumi.domain.Opiskelija;
+import tikape.keskustelufoorumi.domain.Viesti;
 
 public class StatementBuilder {
     public static <K> PreparedStatement findOne(Connection connection, String table, K key) throws SQLException {

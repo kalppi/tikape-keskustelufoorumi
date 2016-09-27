@@ -1,4 +1,4 @@
-package tikape.runko.database;
+package tikape.keskustelufoorumi.database;
 
 import java.io.IOException;
 import java.io.InputStream;

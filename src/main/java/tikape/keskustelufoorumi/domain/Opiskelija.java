@@ -1,4 +1,4 @@
-package tikape.runko.domain;
+package tikape.keskustelufoorumi.domain;
 
 public class Opiskelija {
     private Integer id;

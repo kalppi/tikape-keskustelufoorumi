@@ -1,4 +1,4 @@
-package tikape.runko;
+package tikape.keskustelufoorumi;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -7,10 +7,10 @@ import java.util.List;
 import spark.ModelAndView;
 import static spark.Spark.*;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
-import tikape.runko.database.Database;
-import tikape.runko.database.OpiskelijaDao;
-import tikape.runko.database.ViestiDao;
-import tikape.runko.domain.Viesti;
+import tikape.keskustelufoorumi.database.Database;
+import tikape.keskustelufoorumi.database.OpiskelijaDao;
+import tikape.keskustelufoorumi.database.ViestiDao;
+import tikape.keskustelufoorumi.domain.Viesti;
 
 public class Main {
     public static void main(String[] args) throws Exception {
