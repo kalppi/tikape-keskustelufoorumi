@@ -31,6 +31,8 @@ public class TextUI {
         System.out.println("Tekstikäyttöliittymä");
         System.out.println("Komennot:");
         System.out.println("  hae-viesti [id, id2, id3, ...]");
+        System.out.println("  hae-käyttäjä [id]");
+        System.out.println("  hae-ketju [id]");
         while(true) {
             System.out.println(">> ");
             String line = this.reader.nextLine();
@@ -60,6 +62,12 @@ public class TextUI {
                             System.out.println(v);
                         }
 
+                        break;
+                    case "hae-käyttäjä":
+                        
+                        break;
+                    case "hae-ketju":
+                        
                         break;
                 }
             } catch(Exception e) {
