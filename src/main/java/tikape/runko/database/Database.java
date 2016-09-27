@@ -79,7 +79,6 @@ public class Database {
         }
         
         lueLauseet(lista, "sql/" + tyyppi + ".sql");
-        lueLauseet(lista, "sql/molemmat.sql");
         
         return lista;
     }
