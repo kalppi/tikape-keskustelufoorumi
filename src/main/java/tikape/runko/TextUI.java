@@ -37,8 +37,9 @@ public class TextUI {
         return ids;
     }
     
-    public void start() throws SQLException {        
+    public void start() throws SQLException {    
         this.reader = new Scanner(System.in);
+                
         System.out.println("Tekstikäyttöliittymä");
         System.out.println("Komennot:");
         System.out.println("  hae-viesti [id, id2, id3, ...]");
@@ -46,7 +47,11 @@ public class TextUI {
         System.out.println("  hae-ketju [id]");
         while(true) {
             System.out.println(">> ");
-            String line = this.reader.nextLine();
+            String line = "";
+            
+            if(this.reader.hasNextLine()) {
+                line = this.reader.nextLine();
+            }
             
             ViestiDao vd = new ViestiDao(this.database);
             

@@ -17,8 +17,11 @@ public class Main {
         String username = "";
         String password = "";
         
+        boolean production = false;
+        
         //herokua varten
         if(System.getenv("PORT") != null) {
+            production = true;
             port = Integer.parseInt(System.getenv("PORT"));
         }
         if (System.getenv("DATABASE_URL") != null) {            
@@ -57,9 +60,11 @@ public class Main {
             return new ModelAndView(map, "opiskelija");
         }, new ThymeleafTemplateEngine());
 
-        Thread.sleep(1000);
-        
-        TextUI tui = new TextUI(database);
-        tui.start();
+        if(!production) {
+            Thread.sleep(1000);
+
+            TextUI tui = new TextUI(database);
+            tui.start();
+        }
     }
 }
