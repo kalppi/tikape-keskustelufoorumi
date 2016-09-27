@@ -7,7 +7,7 @@ CREATE TABLE Opiskelija (id SERIAL PRIMARY KEY, nimi VARCHAR(255));
 CREATE TABLE Alue (id SERIAL PRIMARY KEY, nimi VARCHAR(255));
 CREATE TABLE Ketju (id SERIAL PRIMARY KEY, alue_id INTEGER, otsikko VARCHAR(255),
     FOREIGN KEY(alue_id) REFERENCES Alue(id));
-CREATE TABLE Viesti (id SERIAL PRIMARY KEY, opiskelija_id INTEGER, ketju_id INTEGER, aika TIMESTAMP, teksti TEXT,
+CREATE TABLE Viesti (id SERIAL PRIMARY KEY, opiskelija_id INTEGER, ketju_id INTEGER, aika TIMESTAMP WITH TIME ZONE, teksti TEXT,
     FOREIGN KEY(opiskelija_id) REFERENCES Opiskelija(id),
     FOREIGN KEY(ketju_id) REFERENCES Ketju(id));
 

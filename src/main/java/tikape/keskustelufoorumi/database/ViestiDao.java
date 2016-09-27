@@ -11,9 +11,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class ViestiDao implements Dao<Viesti, Integer> {
         Integer opiskelijaId = rs.getInt("opiskelija_id");
         Integer ketjuId = rs.getInt("ketju_id");
         String teksti = rs.getString("teksti");
-        Date aika = StatementBuilder.getDate(rs, "aika");
+        LocalDateTime aika = StatementBuilder.getDate(rs, "aika");
         
         s.close();
         c.close();
@@ -71,7 +72,17 @@ public class ViestiDao implements Dao<Viesti, Integer> {
         List<Viesti> viestit = new ArrayList();
         
         Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findAllIn(c, "Viesti", keys);
+        
+        List<String> fields =  Arrays.asList("id", "opiskelija_id", "ketju_id", "teksti");
+        
+        if(this.database.isPostgres()) {
+            fields.add("aika AT TIME ZONE 'Europe/Helsinki'");
+        } else {
+            fields.add("DATETIME(aika, 'localtime') AS aika");
+        }
+        
+        PreparedStatement s = StatementBuilder.findAllIn(c, "Viesti", keys, fields);
+        
         ResultSet rs = s.executeQuery();
         
         if(rs == null) {
@@ -85,7 +96,7 @@ public class ViestiDao implements Dao<Viesti, Integer> {
             Integer opiskelijaId = rs.getInt("opiskelija_id");
             Integer ketjuId = rs.getInt("ketju_id");
             String teksti = rs.getString("teksti");
-            Date aika = StatementBuilder.getDate(rs, "aika");
+            LocalDateTime aika = StatementBuilder.getDate(rs, "aika");
                         
             Viesti viesti = new Viesti(id, null, ketjuId, aika, teksti);
             viestit.add(viesti);

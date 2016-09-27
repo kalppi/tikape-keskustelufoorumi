@@ -1,16 +1,25 @@
-<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-
-    <head>
+    <head>   
         <title>Otsikko</title>
         <meta charset="utf-8" />
+        
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
     </head>
 
     <body>
-        <h1>Heippa vaan!</h1>
-
-        <p>Ja .. <span th:text="${viesti}">jotain?</span></p>
-
-        <p><a href="/opiskelijat">Tästä opiskelijalistaukseen.</a></p>
+        <div class="container">
+            <h1>Mitä mainioin keskustelufoorumi</h1>
+            <table class="table">
+                <tr>
+                    <th>Nimi</th><th>Viestejä</th><th>Viimeisin</th>
+                </tr>
+                <tr th:each="alue : ${alueet}">
+                    <td><a th:text="${alue.nimi}" th:href="@{/alue/' + alue.id + '-' + alue.nimi + ' ' + 'asd'})" /></td>
+                    <td th:text="${alue.getPostCount()}"></td>
+                    <td th:text="${alue.getLatestPostTime()}"></td>
+                </tr>
+            </table>
+        </div>
     </body>
 </html>

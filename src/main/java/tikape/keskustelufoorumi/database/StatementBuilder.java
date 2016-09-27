@@ -9,35 +9,45 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
-import java.util.TimeZone;
-import tikape.keskustelufoorumi.domain.Opiskelija;
-import tikape.keskustelufoorumi.domain.Viesti;
+import java.util.List;
 
 public class StatementBuilder {
     public static <K> PreparedStatement findOne(Connection connection, String table, K key) throws SQLException {
-        PreparedStatement s = connection.prepareStatement("SELECT * FROM " + table + " WHERE id = ?");
+        return StatementBuilder.findOne(connection, table, key, Arrays.asList("*"));
+    }
+    
+    public static <K> PreparedStatement findOne(Connection connection, String table, K key, List<String> fields) throws SQLException {
+        PreparedStatement s = connection.prepareStatement("SELECT " + String.join(",", fields) + " FROM " + table + " WHERE id = ?");
         s.setObject(1, key);
 
         return s;
     }
     
     public static <K> PreparedStatement findAll(Connection connection, String table) throws SQLException {
-        PreparedStatement s = connection.prepareStatement("SELECT * FROM " + table);
+        return StatementBuilder.findAll(connection, table, Arrays.asList("*"));
+    }
+    
+    public static <K> PreparedStatement findAll(Connection connection, String table, List<String> fields) throws SQLException {
+        PreparedStatement s = connection.prepareStatement("SELECT " + String.join(",", fields) + " FROM " + table);
         
         return s;
     }
     
     public static <K> PreparedStatement findAllIn(Connection connection, String table, Collection<K> keys) throws SQLException {
+        return StatementBuilder.findAllIn(connection, table, keys, Arrays.asList("*"));
+    }
+    
+    public static <K> PreparedStatement findAllIn(Connection connection, String table, Collection<K> keys, List<String> fields) throws SQLException {
         StringBuilder str = new StringBuilder("?");
         for (int i = 1; i < keys.size(); i++) {
             str.append(", ?");
         }
         
-        PreparedStatement s = connection.prepareStatement("SELECT * FROM " + table + " WHERE id IN (" + str + ")");
+        PreparedStatement s = connection.prepareStatement("SELECT " + String.join(",", fields) + " FROM " + table + " WHERE id IN (" + str + ")");
         
         int i = 1;
         for(K key : keys) {
@@ -47,17 +57,13 @@ public class StatementBuilder {
         return s;
     }
     
-    public static Date getDate(ResultSet rs, String key) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        format.setTimeZone(TimeZone.getTimeZone("GMT"));
-        
-        Date date = null;
+    public static LocalDateTime getDate(ResultSet rs, String key) {
+        LocalDateTime date = null;
+
         try {
-            date = format.parse(rs.getString(key));
-        } catch (ParseException e) {
-            return null;
-        } catch (SQLException e) {
-            return null;
+            date = LocalDateTime.parse(rs.getString(key), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        } catch(SQLException e) {
+            
         }
         
         return date;

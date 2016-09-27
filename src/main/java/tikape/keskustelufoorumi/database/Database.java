@@ -11,15 +11,28 @@ public class Database {
     private String databaseAddress;
     private String username;
     private String password;
+    
+    // rumasti tehdään näin, eikä jakseta tehdä monesta luokasta kahta eri versiota
+    private Boolean isPostgres;
 
     public Database(String databaseAddress) throws ClassNotFoundException {
-        this.databaseAddress = databaseAddress;
+        this(databaseAddress, "", "");
     }
     
     public Database(String databaseAddress, String username, String password) {
         this.databaseAddress = databaseAddress;
         this.username = username;
         this.password = password;
+        
+        if(this.databaseAddress.contains("postgres")) {
+            this.isPostgres = true;
+        } else {
+            this.isPostgres = false;
+        }
+    }
+    
+    public Boolean isPostgres() {
+        return this.isPostgres;
     }
     
     // tähän olisi hyvä jonkinlainen connection pooli, mutta varmaan turhan overkilli nyt
@@ -74,7 +87,7 @@ public class Database {
         ArrayList<String> lista = new ArrayList<>();
         
         String tyyppi = "sqlite";
-        if(this.databaseAddress.contains("postgres")) {
+        if(this.isPostgres) {
             tyyppi = "postgres";
         }
         
