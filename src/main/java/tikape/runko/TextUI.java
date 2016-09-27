@@ -26,6 +26,17 @@ public class TextUI {
         this.database = database;
     }
     
+    private List<Integer> getIds(String str) {
+        String[] idParts = str.split(",");
+        List<Integer> ids = new ArrayList();
+        
+        for(String idPart : idParts) {
+            ids.add(Integer.parseInt(idPart.trim()));
+        }
+        
+        return ids;
+    }
+    
     public void start() throws SQLException {        
         this.reader = new Scanner(System.in);
         System.out.println("Tekstikäyttöliittymä");
@@ -43,22 +54,10 @@ public class TextUI {
                 String[] parts = line.split(" ");
                 switch(parts[0]) {
                     case "hae-viesti":
-                        if(parts[1].contains(",")) {
-                            String[] idParts = parts[1].split(",");
-                            List<Integer> ids = new ArrayList();
-                            for(String idPart : idParts) {
-                                ids.add(Integer.parseInt(idPart.trim()));
-                            }
-                            
-                            List<Viesti> vs = vd.findAllIn(ids);
-                            for(Viesti v : vs) {
-                                System.out.println(v);
-                            }
-                        } else {
-                            Integer id = Integer.parseInt(parts[1]);
-
-                            Viesti v = vd.findOne(id);
-
+                        List<Integer> ids = getIds(parts[1]);
+                        List<Viesti> vs = vd.findAllIn(ids);
+                        
+                        for(Viesti v : vs) {
                             System.out.println(v);
                         }
 
