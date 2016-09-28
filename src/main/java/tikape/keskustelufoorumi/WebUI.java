@@ -12,7 +12,6 @@ import java.util.List;
 import spark.ModelAndView;
 import static spark.Spark.get;
 import spark.TemplateEngine;
-import spark.template.thymeleaf.ThymeleafTemplateEngine;
 import tikape.keskustelufoorumi.database.Dao;
 import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.OpiskelijaDao;
@@ -31,16 +30,15 @@ public class WebUI implements UI {
     }
     
     public void start() {
-        ThymeleafTemplateEngine engine = new ThymeleafTemplateEngine();
+        TemplateEngine engine = new MyTemplate();
         
-        
-        get("/", (req, res) -> {
+        get("/", (req, res) -> {            
             HashMap map = new HashMap<>();
             
             List<Alue> alueet = new ArrayList();
-            alueet.add(new Alue(1, "peruna"));
-            alueet.add(new Alue(2, "tomaatti"));
-            alueet.add(new Alue(3, "kurkku"));
+            alueet.add(new Alue(1, "perunakellarien iltahuvit"));
+            alueet.add(new Alue(2, "tomaattien maailmanvalloitus"));
+            alueet.add(new Alue(3, "kurkkusalaattien maihinnousu"));
             
             map.put("viesti", "tervehdys");
             map.put("alueet", alueet);

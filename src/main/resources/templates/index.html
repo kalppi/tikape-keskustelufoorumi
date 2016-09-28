@@ -14,11 +14,13 @@
                 <tr>
                     <th>Nimi</th><th>Viestejä</th><th>Viimeisin</th>
                 </tr>
-                <tr th:each="alue : ${alueet}">
-                    <td><a th:text="${alue.nimi}" th:href="@{/alue/' + alue.id + '-' + alue.nimi + ' ' + 'asd'})" /></td>
-                    <td th:text="${alue.getPostCount()}"></td>
-                    <td th:text="${alue.getLatestPostTime()}"></td>
+                {{#alueet}}
+                <tr>
+                    <td><a href="/alue/{{id}}-{{url-encode nimi}}">{{nimi}}</a></td>
+                    <td>{{postCount}}</td>
+                    <td>{{latestPostTime}}</td>
                 </tr>
+                {{/alueet}}
             </table>
         </div>
     </body>
