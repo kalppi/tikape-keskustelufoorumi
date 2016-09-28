@@ -11,7 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import spark.ModelAndView;
 import static spark.Spark.get;
+import static spark.Spark.port;
 import spark.TemplateEngine;
+import static spark.Spark.port;
+import static spark.Spark.staticFileLocation;
 import tikape.keskustelufoorumi.database.Dao;
 import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.OpiskelijaDao;
@@ -27,6 +30,26 @@ public class WebUI implements UI {
     
     public void init() throws SQLException {
         this.opiskelijaDao = new OpiskelijaDao(this.database);
+        
+        int port = 4567;
+        
+        //herokua varten
+        if(System.getenv("PORT") != null) {
+            port = Integer.parseInt(System.getenv("PORT"));
+        }
+        
+        port(port);
+        staticFileLocation("/public");
+    }
+    
+    private Integer extractId(String text) {
+        try {
+            String[] parts = text.split("-");
+            Integer id = Integer.parseInt(parts[0]);
+            return id;
+        } catch(Exception e) {
+            return null;
+        }
     }
     
     public void start() {
@@ -45,6 +68,10 @@ public class WebUI implements UI {
 
             return new ModelAndView(map, "index");
         }, engine);
+        
+        get("/alue/:id", (req, res) -> {
+            return extractId(req.params(":id"));
+        });
 
         get("/opiskelijat", (req, res) -> {
             HashMap map = new HashMap<>();

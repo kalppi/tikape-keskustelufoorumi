@@ -2,39 +2,26 @@ package tikape.keskustelufoorumi;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import spark.ModelAndView;
-import static spark.Spark.*;
-import spark.template.thymeleaf.ThymeleafTemplateEngine;
 import tikape.keskustelufoorumi.database.Database;
-import tikape.keskustelufoorumi.database.OpiskelijaDao;
-import tikape.keskustelufoorumi.database.ViestiDao;
-import tikape.keskustelufoorumi.domain.Viesti;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        int port = 4567;
         String jdbcOsoite = "jdbc:sqlite:keskustelufoorumi.db";
         String username = "";
         String password = "";
         
         boolean production = false;
         
-        //herokua varten
-        if(System.getenv("PORT") != null) {
-            production = true;
-            port = Integer.parseInt(System.getenv("PORT"));
-        }
         if (System.getenv("DATABASE_URL") != null) {            
+            production = true;
+            
             URI dbUri = new URI(System.getenv("DATABASE_URL"));
 
             username = dbUri.getUserInfo().split(":")[0];
             password = dbUri.getUserInfo().split(":")[1];
             jdbcOsoite = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
         } 
-        
-        port(port);
         
         Database database = new Database(jdbcOsoite, username, password);
         database.init();
