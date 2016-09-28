@@ -35,31 +35,35 @@ public class ViestiDao implements IDao<Viesti, Integer> {
     }
     
     @Override
-    public Viesti findOne(Integer key) throws SQLException {
-        Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findOne(c, "Viesti", key);
-        ResultSet rs = s.executeQuery();
-        
-        if(!rs.next()) {
+    public Viesti findOne(Integer key) {
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = StatementBuilder.findOne(c, "Viesti", key);
+            ResultSet rs = s.executeQuery();
+
+            if(!rs.next()) {
+                return null;
+            }
+
+            Integer id = rs.getInt("id");
+            Integer opiskelijaId = rs.getInt("opiskelija_id");
+            Integer ketjuId = rs.getInt("ketju_id");
+            String teksti = rs.getString("teksti");
+            LocalDateTime aika = StatementBuilder.getDate(rs, "aika");
+
+            s.close();
+            c.close();
+
+            Opiskelija opiskelija = this.opiskelijaDao.findOne(opiskelijaId);
+
+            return new Viesti(id, opiskelija, ketjuId, aika, teksti);
+        } catch(SQLException e) {
             return null;
         }
-        
-        Integer id = rs.getInt("id");
-        Integer opiskelijaId = rs.getInt("opiskelija_id");
-        Integer ketjuId = rs.getInt("ketju_id");
-        String teksti = rs.getString("teksti");
-        LocalDateTime aika = StatementBuilder.getDate(rs, "aika");
-        
-        s.close();
-        c.close();
-        
-        Opiskelija opiskelija = this.opiskelijaDao.findOne(opiskelijaId);
-        
-        return new Viesti(id, opiskelija, ketjuId, aika, teksti);
     }
     
     @Override
-    public Viesti findOneBy(String key, Object value) throws SQLException {
+    public Viesti findOneBy(String key, Object value) {
         return null;
     }
     

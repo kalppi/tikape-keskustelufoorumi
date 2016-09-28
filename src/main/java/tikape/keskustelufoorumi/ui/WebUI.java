@@ -27,11 +27,15 @@ import tikape.keskustelufoorumi.validator.PatternRule;
 import tikape.keskustelufoorumi.validator.Validator;
 import static spark.Spark.get;
 import static spark.Spark.post;
+import tikape.keskustelufoorumi.Context;
+import tikape.keskustelufoorumi.database.AccessTokenDao;
+import tikape.keskustelufoorumi.domain.AccessToken;
 import tikape.keskustelufoorumi.validator.EqualsRule;
 
 public class WebUI implements UI {
     private Database database;
     private OpiskelijaDao opiskelijaDao;
+    private AccessTokenDao accessTokenDao;
     
     private Menu menu;
     
@@ -41,7 +45,7 @@ public class WebUI implements UI {
     
     public void init() throws SQLException {
         this.opiskelijaDao = new OpiskelijaDao(this.database);
-        
+        this.accessTokenDao = new AccessTokenDao(this.database);
         
         int port = 4567;
         
@@ -55,8 +59,15 @@ public class WebUI implements UI {
         
         this.menu = new Menu();
         this.menu.addItem("home", "Etusivu", "/");
-        this.menu.addItem("login", "Kirjaudu", "/kirjaudu");
-        this.menu.addItem("register", "Rekisteröidy", "/rekisteroidy");
+        this.menu.addItem("login", "Kirjaudu", "/kirjaudu", (Context ctx) -> {
+            return ctx.getLoggedInUser() == null;
+        });
+        this.menu.addItem("register", "Rekisteröidy", "/rekisteroidy", (Context ctx) -> {
+            return ctx.getLoggedInUser() == null;
+        });
+        this.menu.addItem("logout", "Kirjaudu ulos", "/ulos", (Context ctx) -> {
+            return ctx.getLoggedInUser() != null;
+        });
     }
     
     private Integer extractId(String text) {
@@ -69,14 +80,32 @@ public class WebUI implements UI {
         }
     }
     
-    private HashMap getDefaultMap(Request req, String activeMenu) {
+    private Context getContext(Request req) {
+        Context ctx = new Context();
         HashMap map = new HashMap<>();
         
-        this.menu.setActive(activeMenu);
+        ctx.setMap(map);
+        
+        if(req.cookies().containsKey("access_token")) {
+            AccessToken token = this.accessTokenDao.findOneBy("token", req.cookies().get("access_token"));
+            
+            System.out.println(token);
+            
+            if(token != null) {
+                Opiskelija opiskelija = this.opiskelijaDao.findOne(token.getOpiskelijaId());
+                ctx.setLoggedInUser(opiskelija);
+                
+                System.out.println(opiskelija);
+                
+                map.put("user", ctx.getLoggedInUser());
+            }
+        }
+        
+        //ctx.setLoggedInUser(this.opiskelijaDao.findOne(5));
+        //map.put("user", ctx.getLoggedInUser());
         
         Session s = req.session();
         
-        map.put("menu", this.menu);
         map.put("success", s.attribute("success"));
         map.put("error", s.attribute("error"));
         map.put("info", s.attribute("info"));
@@ -87,9 +116,11 @@ public class WebUI implements UI {
         s.attribute("info", null);
         s.attribute("warning", null);
         
-        return map;
+        map.put("menu", this.menu.buildWithContext(ctx));
+        
+        return ctx;
     }
-    
+
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
@@ -99,7 +130,9 @@ public class WebUI implements UI {
             alueet.add(new Alue(2, "tomaattien maailmanvalloitus"));
             alueet.add(new Alue(3, "kurkkusalaattien maihinnousu"));
             
-            HashMap map = getDefaultMap(req, "home");
+            //HashMap map = getDefaultMap(req, "home");
+            Context ctx = getContext(req);
+            HashMap map = ctx.getMap();
 
             map.put("viesti", "tervehdys");
             map.put("alueet", alueet);
@@ -112,13 +145,43 @@ public class WebUI implements UI {
         });
         
         get("/kirjaudu", (req, res) -> {
-            HashMap map = getDefaultMap(req, "login");
+            //HashMap map = getDefaultMap(req, "login");
+            Context ctx = getContext(req);
+            HashMap map = ctx.getMap();
+            
+            map.put("login-name", req.session().attribute("login-name"));
+            req.session().attribute("login-name", null);
             
             return new ModelAndView(map, "kirjaudu");
         }, engine);
         
+        post("/kirjaudu", (req, res) -> {
+            if(req.queryParams("login-ok") != null) {
+                String name = req.queryParams("login-name");
+                String pw = req.queryParams("login-pw");
+                
+                Opiskelija o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
+                if(o == null || !o.passwordMatches(pw)) {
+                    req.session().attribute("login-name", name);
+                    req.session().attribute("error", "Rekisteröityminen epäonnistui: virheellinen käyttäjätunnus tai salasana");
+                    res.redirect("/kirjaudu");
+                } else {
+                    String token = Opiskelija.generateAcccessToken();
+                    this.accessTokenDao.insert(token, o.getId());
+                    
+                    res.cookie("access_token", token, 60 * 60 * 24 * 7);
+                    req.session().attribute("success", "Kirjautuminen onnistui");
+                    res.redirect("/");
+                }
+            }
+            
+            return null;
+        });
+        
         get("/rekisteroidy", (req, res) -> {
-            HashMap map = getDefaultMap(req, "register");
+            //HashMap map = getDefaultMap(req, "register");
+            Context ctx = getContext(req);
+            HashMap map = ctx.getMap();
             
             map.put("register-name", req.session().attribute("register-name"));
             req.session().attribute("register-name", null);

@@ -4,9 +4,9 @@ import java.sql.*;
 import java.util.*;
 
 public interface IDao<T, K> {
-    T findOne(K key) throws SQLException;
+    T findOne(K key);
     
-    T findOneBy(String key, Object value) throws SQLException;
+    T findOneBy(String key, Object value);
 
     List<T> findAll() throws SQLException;
     

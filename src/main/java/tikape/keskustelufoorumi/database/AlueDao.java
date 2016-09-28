@@ -23,7 +23,7 @@ public class AlueDao implements IDao<Alue, Integer> {
     }
     
     @Override
-    public Alue findOne(Integer key) throws SQLException {
+    public Alue findOne(Integer key) {
         return null;
     }
     

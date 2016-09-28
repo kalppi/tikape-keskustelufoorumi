@@ -1,6 +1,7 @@
 -- laitetaan foreign key supportti päälle
 PRAGMA foreign_keys = ON;
 
+DROP TABLE IF EXISTS Access_tokens;
 DROP TABLE IF EXISTS Viesti;
 DROP TABLE IF EXISTS Ketju;
 DROP TABLE IF EXISTS Alue;
@@ -13,6 +14,8 @@ CREATE TABLE Ketju (id INTEGER PRIMARY KEY, alue_id INTEGER, otsikko VARCHAR(255
 CREATE TABLE Viesti (id INTEGER PRIMARY KEY, opiskelija_id INTEGER, ketju_id INTEGER, aika TEXT, teksti TEXT,
     FOREIGN KEY(opiskelija_id) REFERENCES Opiskelija(id),
     FOREIGN KEY(ketju_id) REFERENCES Ketju(id));
+CREATE TABLE Access_tokens (id INTEGER PRIMARY KEY, token VARCHAR(32), opiskelija_id INTEGER,
+    FOREIGN KEY(opiskelija_id) REFERENCES Opiskelija(id));
 
 INSERT INTO Opiskelija (nimi, pw_hash) VALUES ('Platon', '');
 INSERT INTO Opiskelija (nimi, pw_hash) VALUES ('Aristoteles', '');

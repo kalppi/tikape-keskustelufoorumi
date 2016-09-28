@@ -25,47 +25,55 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
     }
 
     @Override
-    public Opiskelija findOne(Integer key) throws SQLException {   
-        Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findOne(c, "Opiskelija", key);
+    public Opiskelija findOne(Integer key) {   
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = StatementBuilder.findOne(c, "Opiskelija", key);
 
-        ResultSet rs = s.executeQuery();
-        if(!rs.next()) {
+            ResultSet rs = s.executeQuery();
+            if(!rs.next()) {
+                return null;
+            }
+
+            Integer id = rs.getInt("id");
+            String nimi = rs.getString("nimi");
+            String pwHash = rs.getString("pw_hash");
+
+            Opiskelija o = new Opiskelija(id, nimi, pwHash);
+
+            s.close();
+            c.close();
+
+            return o;
+        } catch(SQLException e) {
             return null;
         }
-
-        Integer id = rs.getInt("id");
-        String nimi = rs.getString("nimi");
-        String pwHash = rs.getString("pw_hash");
-
-        Opiskelija o = new Opiskelija(id, nimi, pwHash);
-
-        s.close();
-        c.close();
-
-        return o;
     }
     
     @Override
-    public Opiskelija findOneBy(String key, Object value) throws SQLException {
-        Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findOneBy(c, "Opiskelija", key, value);
-        
-        ResultSet rs = s.executeQuery();
-        if(!rs.next()) {
+    public Opiskelija findOneBy(String key, Object value) {
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = StatementBuilder.findOneBy(c, "Opiskelija", key, value);
+
+            ResultSet rs = s.executeQuery();
+            if(!rs.next()) {
+                return null;
+            }
+
+            Integer id = rs.getInt("id");
+            String nimi = rs.getString("nimi");
+            String pwHash = rs.getString("pw_hash");
+
+            Opiskelija o = new Opiskelija(id, nimi, pwHash);
+
+            s.close();
+            c.close();
+
+            return o;
+        } catch(SQLException e) {
             return null;
         }
-        
-        Integer id = rs.getInt("id");
-        String nimi = rs.getString("nimi");
-        String pwHash = rs.getString("pw_hash");
-
-        Opiskelija o = new Opiskelija(id, nimi, pwHash);
-
-        s.close();
-        c.close();
-
-        return o;
     }
 
     @Override

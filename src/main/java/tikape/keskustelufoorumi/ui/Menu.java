@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import tikape.keskustelufoorumi.Context;
 
 /**
  *
@@ -31,6 +33,10 @@ public class Menu {
         this.addItem(new MenuItem(this, key, text, target));
     }
     
+    public void addItem(String key, String text, String target, Function<Context, Boolean> show) {
+        this.addItem(new MenuItem(this, key, text, target, show));
+    }
+    
     public Collection<MenuItem> getItems() {
         return this.items.values();
     }
@@ -41,5 +47,19 @@ public class Menu {
     
     public MenuItem getActive() {
         return this.items.get(this.active);
+    }
+    
+    public Menu buildWithContext(Context ctx) {
+        Menu menu = new Menu();
+        
+        for(Map.Entry<String, MenuItem> e : this.items.entrySet()) {
+            Function<Context, Boolean> f = e.getValue().getShowFunction();
+            
+            if(f == null || f.apply(ctx)) {
+                menu.addItem(e.getValue());
+            }
+        }
+        
+        return menu;
     }
 }

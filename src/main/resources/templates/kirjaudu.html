@@ -2,4 +2,18 @@
 
 <h2>Kirjaudu</h2>
 
+<form action="/kirjaudu" method="post">
+    <div class="form-group"
+         ><label for="login-name">Nimi</label>
+        <input class="form-control" type="text" name="login-name" id="login-name" placeholder="Nimi" value="{{login-name}}" />
+    </div>
+    <div class="form-group">
+        <label for="login-pw">Salasana</label>
+        <input class="form-control" type="password" name="login-pw" id="register-pw" placeholder="Salasana" />
+    </div>
+    <div class="form-group">
+        <button name="login-ok" id="login-ok" class="btn btn-default">Kirjaudu</button>
+    </div>
+</form>
+
 {{>bottom}}

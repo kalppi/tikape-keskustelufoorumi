@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html>
     <head>   
         <title>{{menu.active.text}} / keskustelufoorumi</title>
         <meta charset="utf-8" />
@@ -19,10 +19,14 @@
                 </button>
               </div>
               <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">                  
-                  {{#menu.items}}
-                  <li class="{{#if isActive}}active{{/if}}"><a href="{{target}}">{{text}}</a></li>
-                  {{/menu.items}}
+                <ul class="nav navbar-nav">    
+                    {{#menu.items}}
+                    <li class="{{#if isActive}}active{{/if}}"><a href="{{target}}">{{text}}</a></li>
+                    {{/menu.items}}
+                  
+                    {{#if user}}
+                    <li><a href="/kayttaja/{{user.id}}">{{user.nimi}}</a></li>
+                    {{/if}}
                 </ul>
               </div>
             </div>

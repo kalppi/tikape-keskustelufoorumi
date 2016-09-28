@@ -5,6 +5,9 @@
  */
 package tikape.keskustelufoorumi.ui;
 
+import java.util.function.Function;
+import tikape.keskustelufoorumi.Context;
+
 /**
  *
  * @author jarno
@@ -14,12 +17,18 @@ public class MenuItem {
     private String key;
     private String text;
     private String target;
+    private Function<Context, Boolean> show;
     
     public MenuItem(Menu menu, String key, String text, String target) {
+        this(menu, key, text, target, null);
+    }
+    
+    public MenuItem(Menu menu, String key, String text, String target, Function<Context, Boolean> show) {
         this.menu = menu;
         this.key = key;
         this.text = text;
         this.target = target;
+        this.show = show;
     }
     
     public String getKey() {
@@ -36,5 +45,9 @@ public class MenuItem {
     
     public Boolean getIsActive() {
         return this.menu.getActive().getKey().equals(this.key);
+    }
+    
+    public Function<Context, Boolean> getShowFunction() {
+        return this.show;
     }
 }
