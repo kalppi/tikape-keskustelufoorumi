@@ -57,6 +57,17 @@ public class StatementBuilder {
         return s;
     }
     
+    public static PreparedStatement insert(Connection connection, String table, List<String> fields) throws SQLException {
+        StringBuilder str = new StringBuilder("?");
+        for (int i = 1; i < fields.size(); i++) {
+            str.append(", ?");
+        }
+        
+        PreparedStatement s = connection.prepareStatement("INSERT INTO " + table + "(" + String.join(",", fields) + ") VALUES(" + str + ")");
+        
+        return s;
+    }
+    
     public static LocalDateTime getDate(ResultSet rs, String key) {
         LocalDateTime date = null;
 

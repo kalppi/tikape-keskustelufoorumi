@@ -10,15 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import tikape.keskustelufoorumi.ui.UI;
-import tikape.keskustelufoorumi.database.Dao;
 import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.ViestiDao;
 import tikape.keskustelufoorumi.domain.Viesti;
+import tikape.keskustelufoorumi.database.IDao;
 
 public class TextUI implements UI {
     private Database database;
     private Scanner reader = null;
-    private Dao viestiDao = null;
+    private IDao viestiDao = null;
     
     public TextUI(Database database) {
         this.database = database;

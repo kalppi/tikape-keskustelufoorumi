@@ -12,9 +12,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import tikape.keskustelufoorumi.domain.Alue;
 import tikape.keskustelufoorumi.domain.Opiskelija;
 
-public class AlueDao implements Dao<Opiskelija, Integer> {
+public class AlueDao implements IDao<Alue, Integer> {
     private Database database;
 
     public AlueDao(Database database) {
@@ -22,17 +23,17 @@ public class AlueDao implements Dao<Opiskelija, Integer> {
     }
     
     @Override
-    public Opiskelija findOne(Integer key) throws SQLException {
+    public Alue findOne(Integer key) throws SQLException {
         return null;
     }
     
     @Override
-    public List<Opiskelija> findAll() throws SQLException {
+    public List<Alue> findAll() throws SQLException {
         return null;
     }
     
     @Override
-    public List<Opiskelija> findAllIn(Collection<Integer> keys) throws SQLException {
+    public List<Alue> findAllIn(Collection<Integer> keys) throws SQLException {
         return null;
     }
     

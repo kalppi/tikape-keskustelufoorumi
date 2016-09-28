@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import spark.ModelAndView;
 import spark.Request;
+import spark.Session;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.port;
@@ -19,18 +20,22 @@ import spark.TemplateEngine;
 import tikape.keskustelufoorumi.MyTemplate;
 import static spark.Spark.port;
 import static spark.Spark.staticFileLocation;
-import tikape.keskustelufoorumi.database.Dao;
 import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.OpiskelijaDao;
 import tikape.keskustelufoorumi.domain.Alue;
+import tikape.keskustelufoorumi.domain.Opiskelija;
 import tikape.keskustelufoorumi.validator.MaxLengthRule;
 import tikape.keskustelufoorumi.validator.MinLengthRule;
 import tikape.keskustelufoorumi.validator.PatternRule;
 import tikape.keskustelufoorumi.validator.Validator;
+import tikape.keskustelufoorumi.database.IDao;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import tikape.keskustelufoorumi.database.IOpiskelijaDao;
 
 public class WebUI implements UI {
     private Database database;
-    private Dao opiskelijaDao;
+    private IOpiskelijaDao opiskelijaDao;
     
     private Menu menu;
     
@@ -72,12 +77,18 @@ public class WebUI implements UI {
         
         this.menu.setActive(activeMenu);
         
-        map.put("menu", this.menu);
-        map.put("success", req.session().attribute("success"));
-        map.put("error", req.session().attribute("error"));
+        Session s = req.session();
         
-        req.session().attribute("success", null);
-        req.session().attribute("error", null);
+        map.put("menu", this.menu);
+        map.put("success", s.attribute("success"));
+        map.put("error", s.attribute("error"));
+        map.put("info", s.attribute("info"));
+        map.put("warning", s.attribute("warning"));
+        
+        s.attribute("success", null);
+        s.attribute("error", null);
+        s.attribute("info", null);
+        s.attribute("warning", null);
         
         return map;
     }
@@ -112,6 +123,9 @@ public class WebUI implements UI {
         get("/rekisteroidy", (req, res) -> {
             HashMap map = getDefaultMap(req, "register");
             
+            map.put("register-name", req.session().attribute("register-name"));
+            req.session().attribute("register-name", null);
+            
             return new ModelAndView(map, "rekisteroidy");
         }, engine);
         
@@ -127,15 +141,27 @@ public class WebUI implements UI {
                 Validator nameValidator = new Validator();
                 nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla yli 3 merkkiä"));
                 nameValidator.addRule(new MaxLengthRule(20, "nimi ei saa olla yli 20 merkkiä pitkä"));
-                nameValidator.addRule(new PatternRule("^[a-zA-Z]+$", "nimi saa sisältää vain kirjaimia"));
+                nameValidator.addRule(new PatternRule("^[a-zA-Z0-9]+$", "nimi saa sisältää vain kirjaimia ja numeroita"));
                 
                 Validator pwValidator = new Validator();
+                pwValidator.addRule(new MinLengthRule(8, "salasanan pitää olla vähintään 8 merkkiä pitkä"));
                 
                 registrationValidator.addRule(nameValidator);
                 registrationValidator.addRule(pwValidator);
                 
                 if(!registrationValidator.validate(name)) {
                     req.session().attribute("error", "Rekisteröityminen epäonnistui: " + registrationValidator.getReason());
+                    res.redirect("/rekisteroidy");
+                    
+                    return null;
+                }
+                
+                try {
+                    String hash = Opiskelija.hashPassword(pw);
+                    
+                    opiskelijaDao.insert(name, hash);
+                } catch(Exception e) {
+                    req.session().attribute("error", "Rekisteröityminen epäonnistui tuntemattomasta syystä");
                     res.redirect("/rekisteroidy");
                     
                     return null;

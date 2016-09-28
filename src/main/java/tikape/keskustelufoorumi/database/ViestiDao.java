@@ -25,7 +25,7 @@ import tikape.keskustelufoorumi.domain.Viesti;
 import tikape.keskustelufoorumi.database.StatementBuilder;
 
 
-public class ViestiDao implements Dao<Viesti, Integer> {
+public class ViestiDao implements IDao<Viesti, Integer> {
     private Database database;
     private OpiskelijaDao opiskelijaDao;
 

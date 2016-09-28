@@ -10,11 +10,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import tikape.keskustelufoorumi.domain.Opiskelija;
 
-public class OpiskelijaDao implements Dao<Opiskelija, Integer> {
+public class OpiskelijaDao implements IOpiskelijaDao<Opiskelija, Integer> {
     private Database database;
 
     public OpiskelijaDao(Database database) throws SQLException {
@@ -33,8 +34,9 @@ public class OpiskelijaDao implements Dao<Opiskelija, Integer> {
 
         Integer id = rs.getInt("id");
         String nimi = rs.getString("nimi");
+        String pwHash = rs.getString("pw_hash");
 
-        Opiskelija o = new Opiskelija(id, nimi);
+        Opiskelija o = new Opiskelija(id, nimi, pwHash);
 
         s.close();
         c.close();
@@ -52,8 +54,9 @@ public class OpiskelijaDao implements Dao<Opiskelija, Integer> {
         while(rs.next()) {
             Integer id = rs.getInt("id");
             String nimi = rs.getString("nimi");
+            String pwHash = rs.getString("pw_hash");
 
-            opiskelijat.add(new Opiskelija(id, nimi));
+            opiskelijat.add(new Opiskelija(id, nimi, pwHash));
         }
         
         s.close();
@@ -81,8 +84,9 @@ public class OpiskelijaDao implements Dao<Opiskelija, Integer> {
         while(rs.next()) {
             Integer id = rs.getInt("id");
             String nimi = rs.getString("nimi");
+            String pwHash = rs.getString("pw_hash");
 
-            opiskelijat.add(new Opiskelija(id, nimi));
+            opiskelijat.add(new Opiskelija(id, nimi, pwHash));
         }
         
         s.close();
@@ -94,5 +98,16 @@ public class OpiskelijaDao implements Dao<Opiskelija, Integer> {
     @Override
     public void delete(Integer key) throws SQLException {
         // ei toteutettu
+    }
+    
+    @Override
+    public void insert(String nimi, String pwHash) throws SQLException {
+        Connection c = this.database.getConnection();
+        PreparedStatement s = StatementBuilder.insert(c, "Opiskelija", Arrays.asList("nimi", "pw_hash"));
+        
+        s.setObject(1, nimi);
+        s.setObject(2, pwHash);
+        
+        s.execute();
     }
 }
