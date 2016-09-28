@@ -35,6 +35,6 @@ public class MenuItem {
     }
     
     public Boolean getIsActive() {
-        return this.menu.getActive().equals(this.key);
+        return this.menu.getActive().getKey().equals(this.key);
     }
 }

@@ -19,7 +19,7 @@ public class Validator<K> implements IRule<K> {
     public Validator() {
         
     }
-    
+        
     public String getReason() {
         return this.reason;
     }

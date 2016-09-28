@@ -28,6 +28,11 @@ public class AlueDao implements IDao<Alue, Integer> {
     }
     
     @Override
+    public Alue findOneBy(String key, Object value) {
+        return null;
+    }
+    
+    @Override
     public List<Alue> findAll() throws SQLException {
         return null;
     }

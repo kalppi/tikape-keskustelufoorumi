@@ -27,6 +27,17 @@ public class StatementBuilder {
         return s;
     }
     
+    public static PreparedStatement findOneBy(Connection connection, String table, String key, Object value) throws SQLException {
+        return StatementBuilder.findOneBy(connection, table, key, value, Arrays.asList("*"));
+    }
+    
+    public static PreparedStatement findOneBy(Connection connection, String table, String key, Object value, List<String> fields) throws SQLException {
+        PreparedStatement s = connection.prepareStatement("SELECT " + String.join(",", fields) + " FROM " + table + " WHERE " + key + " = ?");
+        s.setObject(1, value);
+
+        return s;
+    }
+    
     public static <K> PreparedStatement findAll(Connection connection, String table) throws SQLException {
         return StatementBuilder.findAll(connection, table, Arrays.asList("*"));
     }

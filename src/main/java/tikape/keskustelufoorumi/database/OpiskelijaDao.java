@@ -5,6 +5,8 @@
  */
 package tikape.keskustelufoorumi.database;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import tikape.keskustelufoorumi.domain.Opiskelija;
 
-public class OpiskelijaDao implements IOpiskelijaDao<Opiskelija, Integer> {
+public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
     private Database database;
 
     public OpiskelijaDao(Database database) throws SQLException {
@@ -32,6 +34,28 @@ public class OpiskelijaDao implements IOpiskelijaDao<Opiskelija, Integer> {
             return null;
         }
 
+        Integer id = rs.getInt("id");
+        String nimi = rs.getString("nimi");
+        String pwHash = rs.getString("pw_hash");
+
+        Opiskelija o = new Opiskelija(id, nimi, pwHash);
+
+        s.close();
+        c.close();
+
+        return o;
+    }
+    
+    @Override
+    public Opiskelija findOneBy(String key, Object value) throws SQLException {
+        Connection c = this.database.getConnection();
+        PreparedStatement s = StatementBuilder.findOneBy(c, "Opiskelija", key, value);
+        
+        ResultSet rs = s.executeQuery();
+        if(!rs.next()) {
+            return null;
+        }
+        
         Integer id = rs.getInt("id");
         String nimi = rs.getString("nimi");
         String pwHash = rs.getString("pw_hash");
@@ -100,8 +124,9 @@ public class OpiskelijaDao implements IOpiskelijaDao<Opiskelija, Integer> {
         // ei toteutettu
     }
     
-    @Override
-    public void insert(String nimi, String pwHash) throws SQLException {
+    public void insert(String nimi, String pw) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String pwHash = Opiskelija.hashPassword(pw);
+        
         Connection c = this.database.getConnection();
         PreparedStatement s = StatementBuilder.insert(c, "Opiskelija", Arrays.asList("nimi", "pw_hash"));
         

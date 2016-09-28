@@ -6,18 +6,21 @@
 package tikape.keskustelufoorumi.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author jarno
  */
 public class Menu {
-    private List<MenuItem> items = new ArrayList();
+    private Map<String, MenuItem> items = new LinkedHashMap();
     private String active = null;
     
     private void addItem(MenuItem item) {
-        this.items.add(item);
+        this.items.put(item.getKey(), item);
         
         if(this.active == null) {
             this.active = item.getKey();
@@ -28,15 +31,15 @@ public class Menu {
         this.addItem(new MenuItem(this, key, text, target));
     }
     
-    public List<MenuItem> getItems() {
-        return this.items;
+    public Collection<MenuItem> getItems() {
+        return this.items.values();
     }
     
     public void setActive(String key) {
         this.active = key;
     }
     
-    public String getActive() {
-        return this.active;
+    public MenuItem getActive() {
+        return this.items.get(this.active);
     }
 }

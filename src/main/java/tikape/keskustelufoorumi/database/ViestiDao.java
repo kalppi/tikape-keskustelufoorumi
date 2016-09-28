@@ -59,6 +59,11 @@ public class ViestiDao implements IDao<Viesti, Integer> {
     }
     
     @Override
+    public Viesti findOneBy(String key, Object value) throws SQLException {
+        return null;
+    }
+    
+    @Override
     public List<Viesti> findAll() throws SQLException {
         return null;
     }

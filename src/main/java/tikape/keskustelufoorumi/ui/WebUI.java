@@ -13,9 +13,6 @@ import java.util.List;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Session;
-import static spark.Spark.get;
-import static spark.Spark.post;
-import static spark.Spark.port;
 import spark.TemplateEngine;
 import tikape.keskustelufoorumi.MyTemplate;
 import static spark.Spark.port;
@@ -28,14 +25,13 @@ import tikape.keskustelufoorumi.validator.MaxLengthRule;
 import tikape.keskustelufoorumi.validator.MinLengthRule;
 import tikape.keskustelufoorumi.validator.PatternRule;
 import tikape.keskustelufoorumi.validator.Validator;
-import tikape.keskustelufoorumi.database.IDao;
 import static spark.Spark.get;
 import static spark.Spark.post;
-import tikape.keskustelufoorumi.database.IOpiskelijaDao;
+import tikape.keskustelufoorumi.validator.EqualsRule;
 
 public class WebUI implements UI {
     private Database database;
-    private IOpiskelijaDao opiskelijaDao;
+    private OpiskelijaDao opiskelijaDao;
     
     private Menu menu;
     
@@ -45,6 +41,7 @@ public class WebUI implements UI {
     
     public void init() throws SQLException {
         this.opiskelijaDao = new OpiskelijaDao(this.database);
+        
         
         int port = 4567;
         
@@ -133,10 +130,9 @@ public class WebUI implements UI {
             if(req.queryParams("register-ok") != null) {
                 String name = req.queryParams("register-name");
                 String pw = req.queryParams("register-pw");
+                String pw2 = req.queryParams("register-pw2");
                 
                 req.session().attribute("register-name", name);
-                
-                Validator registrationValidator = new Validator();
                 
                 Validator nameValidator = new Validator();
                 nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla yli 3 merkkiä"));
@@ -145,25 +141,31 @@ public class WebUI implements UI {
                 
                 Validator pwValidator = new Validator();
                 pwValidator.addRule(new MinLengthRule(8, "salasanan pitää olla vähintään 8 merkkiä pitkä"));
+                pwValidator.addRule(new EqualsRule(pw2, "salasanat eivät ole samoja"));
                 
-                registrationValidator.addRule(nameValidator);
-                registrationValidator.addRule(pwValidator);
+                String error = null;
                 
-                if(!registrationValidator.validate(name)) {
-                    req.session().attribute("error", "Rekisteröityminen epäonnistui: " + registrationValidator.getReason());
-                    res.redirect("/rekisteroidy");
-                    
-                    return null;
+                Opiskelija o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
+                
+                if(o != null) {
+                    error = "nimi on jo käytössä";
+                } else if(!nameValidator.validate(name)) {
+                    error = nameValidator.getReason();
+                } else if(!pwValidator.validate(pw)) {
+                    error = pwValidator.getReason();
                 }
                 
-                try {
-                    String hash = Opiskelija.hashPassword(pw);
-                    
-                    opiskelijaDao.insert(name, hash);
-                } catch(Exception e) {
-                    req.session().attribute("error", "Rekisteröityminen epäonnistui tuntemattomasta syystä");
+                if(error == null) {
+                    try {
+                        opiskelijaDao.insert(name, pw);
+                    } catch(Exception e) {
+                        error = "tuntematon syy";
+                    }
+                }
+                
+                if(error != null) {
+                    req.session().attribute("error", "Rekisteröityminen epäonnistui: " + error);
                     res.redirect("/rekisteroidy");
-                    
                     return null;
                 }
                 
