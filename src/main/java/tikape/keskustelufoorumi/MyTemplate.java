@@ -14,6 +14,8 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 import spark.ModelAndView;
 import spark.TemplateEngine;
 
@@ -23,6 +25,7 @@ import spark.TemplateEngine;
  */
 public class MyTemplate extends TemplateEngine {
     private Handlebars engine;
+    private Map<String, Template> compiledTemplates = new HashMap();
     
     public MyTemplate() {
         TemplateLoader loader = new ClassPathTemplateLoader();
@@ -43,7 +46,16 @@ public class MyTemplate extends TemplateEngine {
     
     public String render(ModelAndView modelAndView) {
         try {
-            Template tpl = this.engine.compile(modelAndView.getViewName());
+            String view = modelAndView.getViewName();
+            Template tpl = null;
+            
+            if(!this.compiledTemplates.containsKey(view)) {
+                tpl = this.engine.compile(view);
+                this.compiledTemplates.put(view, tpl);
+            } else {
+                tpl = this.compiledTemplates.get(view);
+            }
+            
             return tpl.apply(modelAndView.getModel());
         } catch(IOException e) {
             e.printStackTrace();
