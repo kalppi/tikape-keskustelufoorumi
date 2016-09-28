@@ -45,18 +45,19 @@ public class Menu {
         this.active = key;
     }
     
-    public MenuItem getActive() {
-        return this.items.get(this.active);
+    public String getActive() {
+        return this.active;
     }
     
     public Menu buildWithContext(Context ctx) {
         Menu menu = new Menu();
         
         for(Map.Entry<String, MenuItem> e : this.items.entrySet()) {
-            Function<Context, Boolean> f = e.getValue().getShowFunction();
+            MenuItem item = e.getValue();
+            Function<Context, Boolean> f = item.getShowFunction();
             
             if(f == null || f.apply(ctx)) {
-                menu.addItem(e.getValue());
+                menu.addItem(item);
             }
         }
         

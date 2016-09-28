@@ -113,7 +113,10 @@ public class WebUI implements UI {
         s.attribute("info", null);
         s.attribute("warning", null);
         
-        map.put("menu", this.menu.buildWithContext(ctx));
+        Menu menu = this.menu.buildWithContext(ctx);
+        
+        ctx.setMenu(menu);
+        map.put("menu", menu);
         
         return ctx;
     }
@@ -127,8 +130,9 @@ public class WebUI implements UI {
             alueet.add(new Alue(2, "tomaattien maailmanvalloitus"));
             alueet.add(new Alue(3, "kurkkusalaattien maihinnousu"));
             
-            //HashMap map = getDefaultMap(req, "home");
             Context ctx = getContext(req);
+            ctx.getMenu().setActive("home");
+            
             HashMap map = ctx.getMap();
 
             map.put("viesti", "tervehdys");
@@ -157,6 +161,8 @@ public class WebUI implements UI {
         
         get("/kirjaudu", (req, res) -> {
             Context ctx = getContext(req);
+            ctx.getMenu().setActive("login");
+            
             HashMap map = ctx.getMap();
             
             map.put("login-name", req.session().attribute("login-name"));
@@ -173,7 +179,7 @@ public class WebUI implements UI {
                 Opiskelija o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
                 if(o == null || !o.passwordMatches(pw)) {
                     req.session().attribute("login-name", name);
-                    req.session().attribute("error", "Rekisteröityminen epäonnistui: virheellinen käyttäjätunnus tai salasana");
+                    req.session().attribute("error", "Kirjautuminen epäonnistui: virheellinen käyttäjätunnus tai salasana");
                     res.redirect("/kirjaudu");
                 } else {
                     String token = Opiskelija.generateAcccessToken();
@@ -190,6 +196,8 @@ public class WebUI implements UI {
         
         get("/rekisteroidy", (req, res) -> {
             Context ctx = getContext(req);
+            ctx.getMenu().setActive("register");
+            
             HashMap map = ctx.getMap();
             
             map.put("register-name", req.session().attribute("register-name"));

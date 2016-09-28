@@ -33,12 +33,28 @@ public class MyTemplate extends TemplateEngine {
         loader.setSuffix(".html");
         
         this.engine = new Handlebars(loader);
+        
         this.engine.registerHelper("url-encode", new Helper<String>() {
             public CharSequence apply(String text, Options options) {
                 try {
                     return URLEncoder.encode(text, "UTF-8");
                 } catch(UnsupportedEncodingException e) {
                     return text;
+                }
+            }
+        });
+        
+        this.engine.registerHelper("eq", new Helper<String>() {
+            public CharSequence apply(String text1, Options options) {
+                try {
+                    String text2 = options.param(0);
+                    if(text1.equals(text2)) {
+                        return options.fn();
+                    } else {
+                        return options.inverse();
+                    }
+                } catch(Exception e) {
+                    return "";
                 }
             }
         });

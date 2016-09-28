@@ -43,10 +43,6 @@ public class MenuItem {
         return target;
     }
     
-    public Boolean getIsActive() {
-        return this.menu.getActive().getKey().equals(this.key);
-    }
-    
     public Function<Context, Boolean> getShowFunction() {
         return this.show;
     }
