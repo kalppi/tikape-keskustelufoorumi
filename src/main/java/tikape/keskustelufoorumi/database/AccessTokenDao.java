@@ -71,7 +71,9 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
     
     @Override
     public void delete(Integer key) throws SQLException {
-        // ei toteutettu
+        Connection c = this.database.getConnection();
+        PreparedStatement s = StatementBuilder.delete(c, "Access_tokens", key);
+        s.execute();
     }
     
     public void insert(String token, Integer opiskelijaId) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {

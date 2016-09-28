@@ -79,6 +79,13 @@ public class StatementBuilder {
         return s;
     }
     
+    public static <K> PreparedStatement delete(Connection connection, String table, K key) throws SQLException {
+        PreparedStatement s = connection.prepareStatement("DELETE FROM " + table + " WHERE id = ?");
+        s.setObject(1, key);
+        
+        return s;
+    }
+    
     public static LocalDateTime getDate(ResultSet rs, String key) {
         LocalDateTime date = null;
 

@@ -6,6 +6,7 @@
 package tikape.keskustelufoorumi;
 
 import java.util.HashMap;
+import tikape.keskustelufoorumi.domain.AccessToken;
 import tikape.keskustelufoorumi.domain.Opiskelija;
 
 /**
@@ -14,7 +15,8 @@ import tikape.keskustelufoorumi.domain.Opiskelija;
  */
 public class Context {
     private Opiskelija loggedInUser;
-    private HashMap map;    
+    private AccessToken accessToken;
+    private HashMap map;
     
     public Context() {
         
@@ -23,6 +25,10 @@ public class Context {
     public Opiskelija getLoggedInUser() {
         return loggedInUser;
     }
+    
+    public AccessToken getAccessToken() {
+        return this.accessToken;
+    }
 
     public HashMap getMap() {
         return map;
@@ -30,6 +36,10 @@ public class Context {
 
     public void setLoggedInUser(Opiskelija loggedInUser) {
         this.loggedInUser = loggedInUser;
+    }
+    
+    public void setAccessToken(AccessToken token) {
+        this.accessToken = token;
     }
 
     public void setMap(HashMap map) {

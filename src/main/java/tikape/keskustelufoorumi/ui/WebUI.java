@@ -5,7 +5,6 @@
  */
 package tikape.keskustelufoorumi.ui;
 
-import tikape.keskustelufoorumi.ui.UI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,13 +88,11 @@ public class WebUI implements UI {
         if(req.cookies().containsKey("access_token")) {
             AccessToken token = this.accessTokenDao.findOneBy("token", req.cookies().get("access_token"));
             
-            System.out.println(token);
-            
             if(token != null) {
                 Opiskelija opiskelija = this.opiskelijaDao.findOne(token.getOpiskelijaId());
-                ctx.setLoggedInUser(opiskelija);
                 
-                System.out.println(opiskelija);
+                ctx.setAccessToken(token);
+                ctx.setLoggedInUser(opiskelija);
                 
                 map.put("user", ctx.getLoggedInUser());
             }
@@ -144,8 +141,21 @@ public class WebUI implements UI {
             return extractId(req.params(":id"));
         });
         
+        get("/ulos", (req, res) -> {
+            Context ctx = getContext(req);
+            
+            if(ctx.getAccessToken() != null) {
+                this.accessTokenDao.delete(ctx.getAccessToken().getId());
+                
+                res.removeCookie("access_token");
+                req.session().attribute("success", "Uloskirjautuminen onnistui");
+                res.redirect("/");
+            }
+            
+            return null; 
+        });
+        
         get("/kirjaudu", (req, res) -> {
-            //HashMap map = getDefaultMap(req, "login");
             Context ctx = getContext(req);
             HashMap map = ctx.getMap();
             
@@ -179,7 +189,6 @@ public class WebUI implements UI {
         });
         
         get("/rekisteroidy", (req, res) -> {
-            //HashMap map = getDefaultMap(req, "register");
             Context ctx = getContext(req);
             HashMap map = ctx.getMap();
             
