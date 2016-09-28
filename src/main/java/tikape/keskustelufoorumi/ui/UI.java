@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.keskustelufoorumi;
+package tikape.keskustelufoorumi.ui;
 
 import java.sql.SQLException;
 import tikape.keskustelufoorumi.database.Database;

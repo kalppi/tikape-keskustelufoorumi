@@ -1,5 +1,8 @@
 package tikape.keskustelufoorumi;
 
+import tikape.keskustelufoorumi.ui.WebUI;
+import tikape.keskustelufoorumi.ui.TextUI;
+import tikape.keskustelufoorumi.ui.UI;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;

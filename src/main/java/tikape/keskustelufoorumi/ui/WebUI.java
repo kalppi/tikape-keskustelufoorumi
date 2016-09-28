@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.keskustelufoorumi;
+package tikape.keskustelufoorumi.ui;
 
+import tikape.keskustelufoorumi.ui.UI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import spark.ModelAndView;
 import static spark.Spark.get;
 import static spark.Spark.port;
 import spark.TemplateEngine;
+import tikape.keskustelufoorumi.MyTemplate;
 import static spark.Spark.port;
 import static spark.Spark.staticFileLocation;
 import tikape.keskustelufoorumi.database.Dao;
@@ -24,7 +26,7 @@ public class WebUI implements UI {
     private Database database;
     private Dao opiskelijaDao;
     
-    WebUI(Database database) {
+    public WebUI(Database database) {
         this.database = database;
     }
     
@@ -55,6 +57,11 @@ public class WebUI implements UI {
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
+        Menu menu = new Menu();
+        menu.addItem("home", "Etusivu", "/");
+        menu.addItem("login", "Kirjaudu", "/kirjaudu");
+        menu.addItem("register", "Rekisteröidy", "/rekisteroidy");
+        
         get("/", (req, res) -> {            
             HashMap map = new HashMap<>();
             
@@ -63,6 +70,9 @@ public class WebUI implements UI {
             alueet.add(new Alue(2, "tomaattien maailmanvalloitus"));
             alueet.add(new Alue(3, "kurkkusalaattien maihinnousu"));
             
+            menu.setActive("home");
+            
+            map.put("menu", menu);
             map.put("viesti", "tervehdys");
             map.put("alueet", alueet);
 
@@ -72,6 +82,19 @@ public class WebUI implements UI {
         get("/alue/:id", (req, res) -> {
             return extractId(req.params(":id"));
         });
+        
+        get("/kirjaudu", (req, res) -> {
+            menu.setActive("login");
+            
+            HashMap map = new HashMap<>();
+            map.put("menu", menu);
+            
+            return new ModelAndView(map, "kirjaudu");
+        }, engine);
+        
+        get("/rekisteroidy", (req, res) -> {
+            return new ModelAndView(null, "rekisteroidy");
+        }, engine);
 
         get("/opiskelijat", (req, res) -> {
             HashMap map = new HashMap<>();

@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tikape.keskustelufoorumi;
+package tikape.keskustelufoorumi.ui;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import tikape.keskustelufoorumi.ui.UI;
 import tikape.keskustelufoorumi.database.Dao;
 import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.ViestiDao;
