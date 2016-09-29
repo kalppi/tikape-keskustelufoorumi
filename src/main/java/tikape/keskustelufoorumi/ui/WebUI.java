@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
@@ -21,10 +22,7 @@ import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.OpiskelijaDao;
 import tikape.keskustelufoorumi.domain.Alue;
 import tikape.keskustelufoorumi.domain.Opiskelija;
-import tikape.keskustelufoorumi.validator.MaxLengthRule;
-import tikape.keskustelufoorumi.validator.MinLengthRule;
-import tikape.keskustelufoorumi.validator.PatternRule;
-import tikape.keskustelufoorumi.validator.Validator;
+import tikape.keskustelufoorumi.validator.*;
 import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.Context;
 import tikape.keskustelufoorumi.database.AccessTokenDao;
@@ -32,6 +30,7 @@ import tikape.keskustelufoorumi.domain.AccessToken;
 import tikape.keskustelufoorumi.validator.EqualsRule;
 import static spark.Spark.get;
 import static spark.Spark.post;
+import spark.TemplateViewRoute;
 
 public class WebUI implements UI {
     private Database database;
@@ -60,6 +59,7 @@ public class WebUI implements UI {
         
         this.menu = new Menu();
         this.menu.addItem("home", "Etusivu", "/");
+        this.menu.addItem("users", "Käyttäjät", "/kayttajat");
         this.menu.addItem("login", "Kirjaudu", "/kirjaudu", (Context ctx) -> {
             return ctx.getLoggedInUser() == null;
         });
@@ -81,7 +81,7 @@ public class WebUI implements UI {
         }
     }
     
-    private Context getContext(Request req) {
+    private Context getContext(Request req, Response res) {
         Context ctx = new Context();
         HashMap map = new HashMap<>();
         
@@ -122,6 +122,8 @@ public class WebUI implements UI {
         ctx.setMenu(menu);
         map.put("menu", menu);
         
+        ctx.setReqRes(req, res);
+        
         return ctx;
     }
     
@@ -136,33 +138,58 @@ public class WebUI implements UI {
         this.accessTokenDao.delete(ctx.getAccessToken().getId());
         res.removeCookie("access_token");
     }
+    
+    private TemplateViewRoute simpleView(String active, String layout) {
+        return simpleView(active, layout, null);
+    }
+    
+    private TemplateViewRoute simpleView(String active, String layout, BiConsumer<Context, HashMap> fnc) { 
+        return (req, res) -> {
+            Context ctx = getContext(req, res);
+            ctx.getMenu().setActive(active);
+            
+            HashMap map = ctx.getMap(); 
+            
+            ModelAndView mv = new ModelAndView(map, layout);
+            
+            if(fnc != null) {
+                fnc.accept(ctx, map);
+            }
+            
+            return mv;
+        };
+    }
 
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
-        get("/", (req, res) -> {            
+        get("/", simpleView("home", "index", (Context ctx, HashMap map) -> {
             List<Alue> alueet = new ArrayList();
             alueet.add(new Alue(1, "perunakellarien iltahuvit"));
             alueet.add(new Alue(2, "tomaattien maailmanvalloitus"));
             alueet.add(new Alue(3, "kurkkusalaattien maihinnousu"));
             
-            Context ctx = getContext(req);
-            ctx.getMenu().setActive("home");
-            
-            HashMap map = ctx.getMap(); 
-
-            map.put("viesti", "tervehdys");
             map.put("alueet", alueet);
-            
-            return new ModelAndView(map, "index");
-        }, engine);
+        }), engine);
         
+        get("/kayttajat", simpleView("users", "kayttajat"), engine);
+        
+        get("/kirjaudu", simpleView("login", "kirjaudu", (Context ctx, HashMap map) -> {            
+            map.put("login-name", ctx.getRequest().session().attribute("login-name"));
+            ctx.getRequest().session().attribute("login-name", null);
+        }), engine);
+        
+        get("/rekisteroidy", simpleView("register", "rekisteroidy", (Context ctx, HashMap map) -> {
+            map.put("register-name", ctx.getRequest().session().attribute("register-name"));
+            ctx.getRequest().session().attribute("register-name", null);
+        }), engine);
+                
         get("/alue/:id", (req, res) -> {
             return extractId(req.params(":id"));
         });
         
         get("/ulos", (req, res) -> {
-            Context ctx = getContext(req);
+            Context ctx = getContext(req, res);
             
             if(ctx.getAccessToken() != null) {
                 logout(res, ctx);
@@ -172,18 +199,6 @@ public class WebUI implements UI {
             
             return null; 
         });
-        
-        get("/kirjaudu", (req, res) -> {
-            Context ctx = getContext(req);
-            ctx.getMenu().setActive("login");
-            
-            HashMap map = ctx.getMap();
-            
-            map.put("login-name", req.session().attribute("login-name"));
-            req.session().attribute("login-name", null);
-            
-            return new ModelAndView(map, "kirjaudu");
-        }, engine);
         
         post("/kirjaudu", (req, res) -> {
             if(req.queryParams("login-ok") != null) {
@@ -205,18 +220,6 @@ public class WebUI implements UI {
             
             return null;
         });
-        
-        get("/rekisteroidy", (req, res) -> {
-            Context ctx = getContext(req);
-            ctx.getMenu().setActive("register");
-            
-            HashMap map = ctx.getMap();
-            
-            map.put("register-name", req.session().attribute("register-name"));
-            req.session().attribute("register-name", null);
-            
-            return new ModelAndView(map, "rekisteroidy");
-        }, engine);
         
         post("/rekisteroidy", (req, res) -> {
             if(req.queryParams("register-ok") != null) {

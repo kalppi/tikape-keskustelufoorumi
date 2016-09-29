@@ -1,6 +1,8 @@
 package tikape.keskustelufoorumi;
 
 import java.util.HashMap;
+import spark.Request;
+import spark.Response;
 import tikape.keskustelufoorumi.domain.AccessToken;
 import tikape.keskustelufoorumi.domain.Opiskelija;
 import tikape.keskustelufoorumi.ui.Menu;
@@ -14,6 +16,8 @@ public class Context {
     private AccessToken accessToken;
     private Menu menu;
     private HashMap map;
+    private Request req;
+    private Response res;
     
     public Context() {
         
@@ -34,6 +38,14 @@ public class Context {
     public HashMap getMap() {
         return map;
     }
+    
+    public Request getRequest() {
+        return this.req;
+    }
+    
+    public Response getResponse() {
+        return this.res;
+    }
 
     public void setLoggedInUser(Opiskelija loggedInUser) {
         this.loggedInUser = loggedInUser;
@@ -49,5 +61,10 @@ public class Context {
 
     public void setMap(HashMap map) {
         this.map = map;
+    }
+    
+    public void setReqRes(Request req, Response res) {
+        this.req = req;
+        this.res = res;
     }
 }
