@@ -10,11 +10,14 @@ CREATE TABLE Ketju (id SERIAL PRIMARY KEY, alue_id INTEGER, otsikko VARCHAR(255)
 CREATE TABLE Viesti (id SERIAL PRIMARY KEY, opiskelija_id INTEGER, ketju_id INTEGER, aika TIMESTAMP WITH TIME ZONE, teksti TEXT,
     FOREIGN KEY(opiskelija_id) REFERENCES Opiskelija(id),
     FOREIGN KEY(ketju_id) REFERENCES Ketju(id));
+CREATE TABLE Access_tokens (id SERIAL PRIMARY KEY, token VARCHAR(32), opiskelija_id INTEGER,
+    FOREIGN KEY(opiskelija_id) REFERENCES Opiskelija(id));
 
 INSERT INTO Opiskelija (nimi) VALUES ('Platon');
 INSERT INTO Opiskelija (nimi) VALUES ('Aristoteles');
 INSERT INTO Opiskelija (nimi) VALUES ('Homeros');
 INSERT INTO Opiskelija (nimi) VALUES ('Masa');
+INSERT INTO Opiskelija (nimi, pw_hash) VALUES ('jarnoluu', '9xgGv2tFo/9kboNxa8b2qKEU+4HMVz6s4AHzrjCpLL8=FVZkdBGDlzLg2H+DGlsWcsHGoQ8xIOGknqtiuB5BnII=');
 
 INSERT INTO Alue (nimi) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanheitto');
 
