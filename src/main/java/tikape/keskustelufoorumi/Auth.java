@@ -17,11 +17,10 @@ import tikape.keskustelufoorumi.domain.Opiskelija;
  * @author jarno
  */
 public class Auth {
-    public static String generateAcccessToken() {
+    public static String generateAccessToken() {
         SecureRandom sr = new SecureRandom();
         
-        //32 tavua base64 muodossa
-        byte[] bytes = new byte[24];
+        byte[] bytes = new byte[32];
         sr.nextBytes(bytes);
         
         Base64.Encoder enc = Base64.getEncoder();

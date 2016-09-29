@@ -32,6 +32,8 @@ import tikape.keskustelufoorumi.Context;
 import tikape.keskustelufoorumi.database.AccessTokenDao;
 import tikape.keskustelufoorumi.domain.AccessToken;
 import tikape.keskustelufoorumi.validator.EqualsRule;
+import static spark.Spark.get;
+import static spark.Spark.post;
 
 public class WebUI implements UI {
     private Database database;
@@ -129,10 +131,15 @@ public class WebUI implements UI {
     }
     
     private void login(Response res, Opiskelija o) throws SQLException {
-        String token = Auth.generateAcccessToken();
+        String token = Auth.generateAccessToken();
         this.accessTokenDao.insert(token, o.getId());
 
         res.cookie("access_token", token, 60 * 60 * 24 * 7);
+    }
+    
+    private void logout(Response res, Context ctx) throws SQLException {
+        this.accessTokenDao.delete(ctx.getAccessToken().getId());
+        res.removeCookie("access_token");
     }
 
     public void start() {
@@ -163,10 +170,8 @@ public class WebUI implements UI {
             Context ctx = getContext(req);
             
             if(ctx.getAccessToken() != null) {
-                this.accessTokenDao.delete(ctx.getAccessToken().getId());
-                
-                res.removeCookie("access_token");
-                req.session().attribute("success", "Uloskirjautuminen onnistui");
+                logout(res, ctx);
+                //req.session().attribute("success", "Uloskirjautuminen onnistui");
                 res.redirect("/");
             }
             
