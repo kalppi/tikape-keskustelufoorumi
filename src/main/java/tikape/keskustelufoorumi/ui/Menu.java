@@ -49,6 +49,10 @@ public class Menu {
         return this.active;
     }
     
+    public MenuItem getActiveItem() {
+        return this.items.get(this.active);
+    }
+    
     public Menu buildWithContext(Context ctx) {
         Menu menu = new Menu();
         
