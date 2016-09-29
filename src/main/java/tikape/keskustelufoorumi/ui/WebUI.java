@@ -26,6 +26,7 @@ import tikape.keskustelufoorumi.validator.PatternRule;
 import tikape.keskustelufoorumi.validator.Validator;
 import static spark.Spark.get;
 import static spark.Spark.post;
+import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.Context;
 import tikape.keskustelufoorumi.database.AccessTokenDao;
 import tikape.keskustelufoorumi.domain.AccessToken;
@@ -85,6 +86,11 @@ public class WebUI implements UI {
         
         ctx.setMap(map);
         
+        /*
+        
+        mikäli löytyy käytössä oleva access_token keksi, kirjataan käyttäjä sisään
+        
+        */
         if(req.cookies().containsKey("access_token")) {
             AccessToken token = this.accessTokenDao.findOneBy("token", req.cookies().get("access_token"));
             
@@ -173,16 +179,16 @@ public class WebUI implements UI {
         
         post("/kirjaudu", (req, res) -> {
             if(req.queryParams("login-ok") != null) {
-                String name = req.queryParams("login-name");
+                String name = req.queryParams("login-name").trim();
                 String pw = req.queryParams("login-pw");
                 
                 Opiskelija o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
-                if(o == null || !o.passwordMatches(pw)) {
+                if(o == null || !Auth.passwordMatches(o, pw)) {
                     req.session().attribute("login-name", name);
                     req.session().attribute("error", "Kirjautuminen epäonnistui: virheellinen käyttäjätunnus tai salasana");
                     res.redirect("/kirjaudu");
                 } else {
-                    String token = Opiskelija.generateAcccessToken();
+                    String token = Auth.generateAcccessToken();
                     this.accessTokenDao.insert(token, o.getId());
                     
                     res.cookie("access_token", token, 60 * 60 * 24 * 7);
@@ -208,7 +214,7 @@ public class WebUI implements UI {
         
         post("/rekisteroidy", (req, res) -> {
             if(req.queryParams("register-ok") != null) {
-                String name = req.queryParams("register-name");
+                String name = req.queryParams("register-name").trim();
                 String pw = req.queryParams("register-pw");
                 String pw2 = req.queryParams("register-pw2");
                 

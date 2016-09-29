@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.domain.Opiskelija;
 
 public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
@@ -132,8 +133,8 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
         // ei toteutettu
     }
     
-    public void insert(String nimi, String pw) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String pwHash = Opiskelija.hashPassword(pw);
+    public void insert(String nimi, String pw) throws Exception {
+        String pwHash = Auth.hashPassword(pw);
         
         Connection c = this.database.getConnection();
         PreparedStatement s = StatementBuilder.insert(c, "Opiskelija", Arrays.asList("nimi", "pw_hash"));
