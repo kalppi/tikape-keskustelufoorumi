@@ -25,8 +25,6 @@ import tikape.keskustelufoorumi.validator.MaxLengthRule;
 import tikape.keskustelufoorumi.validator.MinLengthRule;
 import tikape.keskustelufoorumi.validator.PatternRule;
 import tikape.keskustelufoorumi.validator.Validator;
-import static spark.Spark.get;
-import static spark.Spark.post;
 import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.Context;
 import tikape.keskustelufoorumi.database.AccessTokenDao;
@@ -107,9 +105,6 @@ public class WebUI implements UI {
             }
         }
         
-        //ctx.setLoggedInUser(this.opiskelijaDao.findOne(5));
-        //map.put("user", ctx.getLoggedInUser());
-        
         Session s = req.session();
         
         map.put("success", s.attribute("success"));
@@ -154,7 +149,7 @@ public class WebUI implements UI {
             Context ctx = getContext(req);
             ctx.getMenu().setActive("home");
             
-            HashMap map = ctx.getMap();
+            HashMap map = ctx.getMap(); 
 
             map.put("viesti", "tervehdys");
             map.put("alueet", alueet);
@@ -276,19 +271,5 @@ public class WebUI implements UI {
                 
             return null;
         });
-
-        get("/opiskelijat", (req, res) -> {
-            HashMap map = new HashMap<>();
-            map.put("opiskelijat", opiskelijaDao.findAll());
-
-            return new ModelAndView(map, "opiskelijat");
-        }, engine);
-
-        get("/opiskelijat/:id", (req, res) -> {
-            HashMap map = new HashMap<>();
-            map.put("opiskelija", opiskelijaDao.findOne(Integer.parseInt(req.params("id"))));
-
-            return new ModelAndView(map, "opiskelija");
-        }, engine);
     }
 }

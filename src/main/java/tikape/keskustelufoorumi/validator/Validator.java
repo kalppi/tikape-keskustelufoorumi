@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author jarno
  */
-public class Validator<K> implements IRule<K> {
+public class Validator<K> {
     private List<IRule> rules = new ArrayList();
     private String reason;
     
