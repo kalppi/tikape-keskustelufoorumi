@@ -19,7 +19,9 @@ import tikape.keskustelufoorumi.domain.Opiskelija;
 public class Auth {
     public static String generateAcccessToken() {
         SecureRandom sr = new SecureRandom();
-        byte[] bytes = new byte[256];
+        
+        //32 tavua base64 muodossa
+        byte[] bytes = new byte[24];
         sr.nextBytes(bytes);
         
         Base64.Encoder enc = Base64.getEncoder();
