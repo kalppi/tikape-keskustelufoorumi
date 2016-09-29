@@ -76,7 +76,7 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
         s.execute();
     }
     
-    public void insert(String token, Integer opiskelijaId) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void insert(String token, Integer opiskelijaId) throws SQLException {
         Connection c = this.database.getConnection();
         PreparedStatement s = StatementBuilder.insert(c, "Access_tokens", Arrays.asList("token", "opiskelija_id"));
         

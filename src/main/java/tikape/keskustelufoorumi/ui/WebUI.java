@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import spark.ModelAndView;
 import spark.Request;
+import spark.Response;
 import spark.Session;
 import spark.TemplateEngine;
 import tikape.keskustelufoorumi.MyTemplate;
@@ -126,6 +127,13 @@ public class WebUI implements UI {
         
         return ctx;
     }
+    
+    private void login(Response res, Opiskelija o) throws SQLException {
+        String token = Auth.generateAcccessToken();
+        this.accessTokenDao.insert(token, o.getId());
+
+        res.cookie("access_token", token, 60 * 60 * 24 * 7);
+    }
 
     public void start() {
         TemplateEngine engine = new MyTemplate();
@@ -188,10 +196,8 @@ public class WebUI implements UI {
                     req.session().attribute("error", "Kirjautuminen epäonnistui: virheellinen käyttäjätunnus tai salasana");
                     res.redirect("/kirjaudu");
                 } else {
-                    String token = Auth.generateAcccessToken();
-                    this.accessTokenDao.insert(token, o.getId());
+                    login(res, o);
                     
-                    res.cookie("access_token", token, 60 * 60 * 24 * 7);
                     req.session().attribute("success", "Kirjautuminen onnistui");
                     res.redirect("/");
                 }
@@ -252,11 +258,14 @@ public class WebUI implements UI {
                 if(error != null) {
                     req.session().attribute("error", "Rekisteröityminen epäonnistui: " + error);
                     res.redirect("/rekisteroidy");
+                    
                     return null;
                 }
                 
+                o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
+                login(res, o);
+                
                 req.session().attribute("success", "Rekisteröityminen onnistui");
-
                 res.redirect("/");
             }
                 

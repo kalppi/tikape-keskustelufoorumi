@@ -1,5 +1,6 @@
--- laitetaan foreign key supportti päälle
+-- laitetaan foreign key supportti päälle ja ollaan vähän tarkempia asioiden suhteen eikä vain niellä niitä
 PRAGMA foreign_keys = ON;
+PRAGMA strict=ON;
 
 DROP TABLE IF EXISTS Access_tokens;
 DROP TABLE IF EXISTS Viesti;
