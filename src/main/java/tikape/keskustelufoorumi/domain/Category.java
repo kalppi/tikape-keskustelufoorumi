@@ -9,21 +9,21 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-public class Alue {
+public class Category {
     private Integer id;
-    private String nimi;
+    private String name;
     
-    public Alue(Integer id, String nimi) {
+    public Category(Integer id, String name) {
         this.id = id;
-        this.nimi = nimi;
+        this.name = name;
     }
     
     public Integer getId() {
         return this.id;
     }
     
-    public String getNimi() {
-        return this.nimi;
+    public String getName() {
+        return this.name;
     }
     
     public Integer getPostCount() {
@@ -32,6 +32,6 @@ public class Alue {
     
     public String getLatestPostTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        return new Viesti(1, null, 0, LocalDateTime.now(), "asdasd").getAika().format(formatter);
+        return new Message(1, null, 0, LocalDateTime.now(), "asdasd").getSent().format(formatter);
     }
 }

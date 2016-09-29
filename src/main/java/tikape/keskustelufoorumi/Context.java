@@ -4,7 +4,7 @@ import java.util.HashMap;
 import spark.Request;
 import spark.Response;
 import tikape.keskustelufoorumi.domain.AccessToken;
-import tikape.keskustelufoorumi.domain.Opiskelija;
+import tikape.keskustelufoorumi.domain.User;
 import tikape.keskustelufoorumi.ui.Menu;
 
 /**
@@ -12,7 +12,7 @@ import tikape.keskustelufoorumi.ui.Menu;
  * @author jarno
  */
 public class Context {
-    private Opiskelija loggedInUser;
+    private User loggedInUser;
     private AccessToken accessToken;
     private Menu menu;
     private HashMap map;
@@ -23,7 +23,7 @@ public class Context {
         
     }
 
-    public Opiskelija getLoggedInUser() {
+    public User getLoggedInUser() {
         return loggedInUser;
     }
     
@@ -47,7 +47,7 @@ public class Context {
         return this.res;
     }
 
-    public void setLoggedInUser(Opiskelija loggedInUser) {
+    public void setLoggedInUser(User loggedInUser) {
         this.loggedInUser = loggedInUser;
     }
     

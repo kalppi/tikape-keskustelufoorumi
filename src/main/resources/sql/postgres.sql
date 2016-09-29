@@ -1,41 +1,41 @@
 
 DROP TABLE IF EXISTS Access_tokens;
-DROP TABLE IF EXISTS Viesti;
-DROP TABLE IF EXISTS Ketju;
-DROP TABLE IF EXISTS Alue;
-DROP TABLE IF EXISTS Opiskelija;
+DROP TABLE IF EXISTS Messages;
+DROP TABLE IF EXISTS Threads;
+DROP TABLE IF EXISTS Categories;
+DROP TABLE IF EXISTS Users;
 
-CREATE TABLE Opiskelija (id SERIAL PRIMARY KEY, nimi VARCHAR(255), pw_hash VARCHAR(88));
-CREATE TABLE Alue (id SERIAL PRIMARY KEY, nimi VARCHAR(255));
-CREATE TABLE Ketju (id SERIAL PRIMARY KEY, alue_id INTEGER, otsikko VARCHAR(255),
-    FOREIGN KEY(alue_id) REFERENCES Alue(id));
-CREATE TABLE Viesti (id SERIAL PRIMARY KEY, opiskelija_id INTEGER, ketju_id INTEGER, aika TIMESTAMP WITH TIME ZONE, teksti TEXT,
-    FOREIGN KEY(opiskelija_id) REFERENCES Opiskelija(id),
-    FOREIGN KEY(ketju_id) REFERENCES Ketju(id));
-CREATE TABLE Access_tokens (id SERIAL PRIMARY KEY, token VARCHAR(44), opiskelija_id INTEGER,
-    FOREIGN KEY(opiskelija_id) REFERENCES Opiskelija(id));
+CREATE TABLE Users (id SERIAL PRIMARY KEY, name VARCHAR(255), pw_hash VARCHAR(88));
+CREATE TABLE Categories (id SERIAL PRIMARY KEY, name VARCHAR(255));
+CREATE TABLE Threads (id SERIAL PRIMARY KEY, category_id INTEGER, title VARCHAR(255),
+    FOREIGN KEY(category_id) REFERENCES Categories(id));
+CREATE TABLE Message (id SERIAL PRIMARY KEY, user_id INTEGER, thread_id INTEGER, sent TIMESTAMP WITH TIME ZONE, text TEXT,
+    FOREIGN KEY(user_id) REFERENCES Users(id),
+    FOREIGN KEY(thread_id) REFERENCES Threads(id));
+CREATE TABLE Access_tokens (id SERIAL PRIMARY KEY, token VARCHAR(44), user_id INTEGER,
+    FOREIGN KEY(user_id) REFERENCES Users(id));
 
-INSERT INTO Opiskelija (nimi) VALUES ('Platon');
-INSERT INTO Opiskelija (nimi) VALUES ('Aristoteles');
-INSERT INTO Opiskelija (nimi) VALUES ('Homeros');
-INSERT INTO Opiskelija (nimi) VALUES ('Masa');
-INSERT INTO Opiskelija (nimi, pw_hash) VALUES ('jarnoluu', '9xgGv2tFo/9kboNxa8b2qKEU+4HMVz6s4AHzrjCpLL8=FVZkdBGDlzLg2H+DGlsWcsHGoQ8xIOGknqtiuB5BnII=');
+INSERT INTO Users (name) VALUES ('Platon');
+INSERT INTO Users (name) VALUES ('Aristoteles');
+INSERT INTO Users (name) VALUES ('Homeros');
+INSERT INTO Users (name) VALUES ('Masa');
+INSERT INTO Users (name, pw_hash) VALUES ('jarnoluu', '9xgGv2tFo/9kboNxa8b2qKEU+4HMVz6s4AHzrjCpLL8=FVZkdBGDlzLg2H+DGlsWcsHGoQ8xIOGknqtiuB5BnII=');
 
-INSERT INTO Alue (nimi) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanheitto');
+INSERT INTO Categories (name) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanheitto');
 
-INSERT INTO Ketju (alue_id, otsikko) VALUES (1, 'Ketju1'), (1, 'Ketju2'), (2, 'Ketju3');
+INSERT INTO Threads (category_id, title) VALUES (1, 'Ketju1'), (1, 'Ketju2'), (2, 'Ketju3');
 
-INSERT INTO Viesti (opiskelija_id, ketju_id, aika, teksti) VALUES
+INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
     (1, 1, now() - INTERVAL '5 hour', 'Everything is awesome'),
     (2, 1, now() - INTERVAL '4 hour', 'Todellakin'),
     (3, 1, now() - INTERVAL '3 hour', 'Niinhän sitä sanotaan');
   
-INSERT INTO Viesti (opiskelija_id, ketju_id, aika, teksti) VALUES
+INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
     (2, 2, now() - INTERVAL '4 hour', 'Tättärää'),
     (1, 2, now() - INTERVAL '2 hour', 'Tetteree!'),
     (2, 2, now() - INTERVAL '1 hour', 'Tätätätätätää');
 
-INSERT INTO Viesti (opiskelija_id, ketju_id, aika, teksti) VALUES
+INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
     (3, 3, now() - INTERVAL '5 hour', 'aaaaaaa'),
     (3, 3, now() - INTERVAL '25 hour', 'bbbbbb'),
     (2, 3, now(), 'ccc');

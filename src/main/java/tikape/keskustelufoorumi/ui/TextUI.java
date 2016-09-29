@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Scanner;
 import tikape.keskustelufoorumi.ui.UI;
 import tikape.keskustelufoorumi.database.Database;
-import tikape.keskustelufoorumi.database.ViestiDao;
-import tikape.keskustelufoorumi.domain.Viesti;
+import tikape.keskustelufoorumi.database.MessageDao;
+import tikape.keskustelufoorumi.domain.Message;
 import tikape.keskustelufoorumi.database.IDao;
 
 public class TextUI implements UI {
@@ -25,7 +25,7 @@ public class TextUI implements UI {
     }
     
     public void init() throws SQLException {
-        this.viestiDao = new ViestiDao(this.database);
+        this.viestiDao = new MessageDao(this.database);
     }
     
     private List<Integer> getIds(String str) {
@@ -61,9 +61,9 @@ public class TextUI implements UI {
                 switch(parts[0]) {
                     case "hae-viesti":
                         List<Integer> ids = getIds(parts[1]);
-                        List<Viesti> vs = this.viestiDao.findAllIn(ids);
+                        List<Message> vs = this.viestiDao.findAllIn(ids);
                         
-                        for(Viesti v : vs) {
+                        for(Message v : vs) {
                             System.out.println(v);
                         }
 

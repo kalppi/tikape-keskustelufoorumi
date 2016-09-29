@@ -7,14 +7,14 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import javax.crypto.SecretKeyFactory;
 
-public class Opiskelija {
+public class User {
     private Integer id;
-    private String nimi;
+    private String name;
     private String pwHash;
 
-    public Opiskelija(Integer id, String nimi, String pwHash) {
+    public User(Integer id, String name, String pwHash) {
         this.id = id;
-        this.nimi = nimi;
+        this.name = name;
         this.pwHash = pwHash;
     }
 
@@ -26,12 +26,12 @@ public class Opiskelija {
         this.id = id;
     }
 
-    public String getNimi() {
-        return nimi;
+    public String getName() {
+        return name;
     }
 
-    public void setNimi(String nimi) {
-        this.nimi = nimi;
+    public void setName(String name) {
+        this.name = name;
     }
     
     public String getPwHash() {
@@ -40,6 +40,6 @@ public class Opiskelija {
     
     @Override
     public String toString() {
-        return "[" + this.id + "/" + this.nimi + "]";
+        return "[" + this.id + "/" + this.name + "]";
     }
 }

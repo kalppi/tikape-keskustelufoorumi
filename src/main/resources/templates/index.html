@@ -6,13 +6,13 @@
     <tr>
         <th>Nimi</th><th>Viestejä</th><th>Viimeisin</th>
     </tr>
-    {{#alueet}}
+    {{#categories}}
     <tr>
-        <td><a href="/alue/{{id}}-{{url-encode nimi}}">{{nimi}}</a></td>
+        <td><a href="/alue/{{id}}-{{url-encode name}}">{{name}}</a></td>
         <td>{{postCount}}</td>
         <td>{{latestPostTime}}</td>
     </tr>
-    {{/alueet}}
+    {{/categories}}
 </table>
 
 {{>bottom}}

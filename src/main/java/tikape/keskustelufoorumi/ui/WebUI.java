@@ -19,9 +19,9 @@ import tikape.keskustelufoorumi.MyTemplate;
 import static spark.Spark.port;
 import static spark.Spark.staticFileLocation;
 import tikape.keskustelufoorumi.database.Database;
-import tikape.keskustelufoorumi.database.OpiskelijaDao;
-import tikape.keskustelufoorumi.domain.Alue;
-import tikape.keskustelufoorumi.domain.Opiskelija;
+import tikape.keskustelufoorumi.database.UserDao;
+import tikape.keskustelufoorumi.domain.Category;
+import tikape.keskustelufoorumi.domain.User;
 import tikape.keskustelufoorumi.validator.*;
 import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.Context;
@@ -31,10 +31,264 @@ import tikape.keskustelufoorumi.validator.EqualsRule;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import spark.TemplateViewRoute;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.get;
+import static spark.Spark.post;
 
 public class WebUI implements UI {
     private Database database;
-    private OpiskelijaDao opiskelijaDao;
+    private UserDao userDao;
     private AccessTokenDao accessTokenDao;
     
     private Menu menu;
@@ -45,7 +299,7 @@ public class WebUI implements UI {
     
     @Override
     public void init() throws SQLException {
-        this.opiskelijaDao = new OpiskelijaDao(this.database);
+        this.userDao = new UserDao(this.database);
         this.accessTokenDao = new AccessTokenDao(this.database);
         
         int port = 4567;
@@ -97,10 +351,10 @@ public class WebUI implements UI {
             AccessToken token = this.accessTokenDao.findOneBy("token", req.cookies().get("access_token"));
             
             if(token != null) {
-                Opiskelija opiskelija = this.opiskelijaDao.findOne(token.getOpiskelijaId());
+                User user = this.userDao.findOne(token.getUserId());
                 
                 ctx.setAccessToken(token);
-                ctx.setLoggedInUser(opiskelija);
+                ctx.setLoggedInUser(user);
                 
                 map.put("user", ctx.getLoggedInUser());
             }
@@ -128,7 +382,7 @@ public class WebUI implements UI {
         return ctx;
     }
     
-    private void login(Response res, Opiskelija o) throws SQLException {
+    private void login(Response res, User o) throws SQLException {
         String token = Auth.generateAccessToken();
         this.accessTokenDao.insert(token, o.getId());
 
@@ -167,12 +421,12 @@ public class WebUI implements UI {
         get("/", simpleView("home", "index", (Context ctx) -> {
             HashMap map = ctx.getMap();
             
-            List<Alue> alueet = new ArrayList();
-            alueet.add(new Alue(1, "perunakellarien iltahuvit"));
-            alueet.add(new Alue(2, "tomaattien maailmanvalloitus"));
-            alueet.add(new Alue(3, "kurkkusalaattien maihinnousu"));
+            List<Category> categories = new ArrayList();
+            categories.add(new Category(1, "perunakellarien iltahuvit"));
+            categories.add(new Category(2, "tomaattien maailmanvalloitus"));
+            categories.add(new Category(3, "kurkkusalaattien maihinnousu"));
             
-            map.put("alueet", alueet);
+            map.put("categories", categories);
         }), engine);
         
         get("/kayttajat", simpleView("users", "kayttajat"), engine);
@@ -213,7 +467,7 @@ public class WebUI implements UI {
                 String name = req.queryParams("login-name").trim();
                 String pw = req.queryParams("login-pw");
                 
-                Opiskelija o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
+                User o = (User)this.userDao.findOneBy("name", name);
                 if(o == null || !Auth.passwordMatches(o, pw)) {
                     req.session().attribute("login-name", name);
                     req.session().attribute("error", "Kirjautuminen epäonnistui: virheellinen käyttäjätunnus tai salasana");
@@ -248,7 +502,7 @@ public class WebUI implements UI {
                 
                 String error = null;
                 
-                Opiskelija o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
+                User o = (User)this.userDao.findOneBy("name", name);
                 
                 if(o != null) {
                     error = "nimi on jo käytössä";
@@ -260,7 +514,7 @@ public class WebUI implements UI {
                 
                 if(error == null) {
                     try {
-                        opiskelijaDao.insert(name, pw);
+                        userDao.insert(name, pw);
                     } catch(Exception e) {
                         error = "tuntematon syy";
                     }
@@ -273,7 +527,7 @@ public class WebUI implements UI {
                     return null;
                 }
                 
-                o = (Opiskelija)this.opiskelijaDao.findOneBy("nimi", name);
+                o = (User)this.userDao.findOneBy("name", name);
                 login(res, o);
                 
                 req.session().attribute("success", "Rekisteröityminen onnistui");

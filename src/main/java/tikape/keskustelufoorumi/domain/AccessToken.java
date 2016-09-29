@@ -12,12 +12,12 @@ package tikape.keskustelufoorumi.domain;
 public class AccessToken {
     private Integer id;
     private String token;
-    private Integer opiskelijaId;
+    private Integer userId;
     
-    public AccessToken(Integer id, String token, Integer opiskelijaId) {
+    public AccessToken(Integer id, String token, Integer userId) {
         this.id = id;
         this.token = token;
-        this.opiskelijaId = opiskelijaId;
+        this.userId = userId;
     }
 
     public Integer getId() {
@@ -28,7 +28,7 @@ public class AccessToken {
         return token;
     }
 
-    public Integer getOpiskelijaId() {
-        return opiskelijaId;
+    public Integer getUserId() {
+        return userId;
     }
 }

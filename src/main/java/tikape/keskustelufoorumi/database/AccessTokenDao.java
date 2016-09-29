@@ -1,12 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tikape.keskustelufoorumi.database;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,14 +8,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import tikape.keskustelufoorumi.domain.AccessToken;
-import tikape.keskustelufoorumi.domain.Opiskelija;
+
 
 /**
  *
  * @author jarno
  */
 public class AccessTokenDao implements IDao<AccessToken, Integer> {
-        private Database database;
+    private Database database;
 
     public AccessTokenDao(Database database) {
         this.database = database;
@@ -45,10 +38,10 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
             }
 
             Integer id = rs.getInt("id");
-            String nimi = rs.getString("token");
-            Integer opiskelijaId = rs.getInt("opiskelija_id");
+            String name = rs.getString("token");
+            Integer userId = rs.getInt("user_id");
 
-            AccessToken t = new AccessToken(id, nimi, opiskelijaId);
+            AccessToken t = new AccessToken(id, name, userId);
 
             s.close();
             c.close();
@@ -76,12 +69,12 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
         s.execute();
     }
     
-    public void insert(String token, Integer opiskelijaId) throws SQLException {
+    public void insert(String token, Integer userId) throws SQLException {
         Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.insert(c, "Access_tokens", Arrays.asList("token", "opiskelija_id"));
+        PreparedStatement s = StatementBuilder.insert(c, "Access_tokens", Arrays.asList("token", "user_id"));
         
         s.setObject(1, token);
-        s.setObject(2, opiskelijaId);
+        s.setObject(2, userId);
         
         s.execute();
     }

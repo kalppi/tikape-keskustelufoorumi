@@ -5,7 +5,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
-import tikape.keskustelufoorumi.domain.Opiskelija;
+import tikape.keskustelufoorumi.domain.User;
 
 /**
  *
@@ -50,7 +50,7 @@ public class Auth {
         }
     }
     
-    public static Boolean passwordMatches(Opiskelija o, String pw) {
+    public static Boolean passwordMatches(User o, String pw) {
         try {
             String salt = o.getPwHash().substring(0, 44);
             Base64.Decoder decoder = Base64.getDecoder();

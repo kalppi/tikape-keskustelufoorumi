@@ -85,16 +85,4 @@ public class StatementBuilder {
         
         return s;
     }
-    
-    public static LocalDateTime getDate(ResultSet rs, String key) {
-        LocalDateTime date = null;
-
-        try {
-            date = LocalDateTime.parse(rs.getString(key), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        } catch(SQLException e) {
-            
-        }
-        
-        return date;
-    }
 }

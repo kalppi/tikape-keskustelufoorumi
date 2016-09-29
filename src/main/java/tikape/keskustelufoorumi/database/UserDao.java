@@ -5,8 +5,6 @@
  */
 package tikape.keskustelufoorumi.database;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,20 +14,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import tikape.keskustelufoorumi.Auth;
-import tikape.keskustelufoorumi.domain.Opiskelija;
+import tikape.keskustelufoorumi.domain.User;
 
-public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
+public class UserDao implements IDao<User, Integer> {
     private Database database;
 
-    public OpiskelijaDao(Database database) throws SQLException {
+    public UserDao(Database database) throws SQLException {
         this.database = database;
     }
 
     @Override
-    public Opiskelija findOne(Integer key) {   
+    public User findOne(Integer key) {   
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOne(c, "Opiskelija", key);
+            PreparedStatement s = StatementBuilder.findOne(c, "Users", key);
 
             ResultSet rs = s.executeQuery();
             if(!rs.next()) {
@@ -37,10 +35,10 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
             }
 
             Integer id = rs.getInt("id");
-            String nimi = rs.getString("nimi");
+            String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
 
-            Opiskelija o = new Opiskelija(id, nimi, pwHash);
+            User o = new User(id, name, pwHash);
 
             s.close();
             c.close();
@@ -52,10 +50,10 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
     }
     
     @Override
-    public Opiskelija findOneBy(String key, Object value) {
+    public User findOneBy(String key, Object value) {
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOneBy(c, "Opiskelija", key, value);
+            PreparedStatement s = StatementBuilder.findOneBy(c, "Users", key, value);
 
             ResultSet rs = s.executeQuery();
             if(!rs.next()) {
@@ -63,10 +61,10 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
             }
 
             Integer id = rs.getInt("id");
-            String nimi = rs.getString("nimi");
+            String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
 
-            Opiskelija o = new Opiskelija(id, nimi, pwHash);
+            User o = new User(id, name, pwHash);
 
             s.close();
             c.close();
@@ -78,36 +76,36 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
     }
 
     @Override
-    public List<Opiskelija> findAll() throws SQLException {
+    public List<User> findAll() throws SQLException {
         Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findAll(c, "Opiskelija");
+        PreparedStatement s = StatementBuilder.findAll(c, "Users");
 
         ResultSet rs = s.executeQuery();
-        List<Opiskelija> opiskelijat = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         while(rs.next()) {
             Integer id = rs.getInt("id");
-            String nimi = rs.getString("nimi");
+            String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
 
-            opiskelijat.add(new Opiskelija(id, nimi, pwHash));
+            users.add(new User(id, name, pwHash));
         }
         
         s.close();
         c.close();
 
-        return opiskelijat;
+        return users;
     }
     
     @Override
-    public List<Opiskelija> findAllIn(Collection<Integer> keys) throws SQLException {
+    public List<User> findAllIn(Collection<Integer> keys) throws SQLException {
         if(keys.isEmpty()) {
             return new ArrayList();
         }
         
-        List<Opiskelija> opiskelijat = new ArrayList();
+        List<User> users = new ArrayList();
         
         Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findAllIn(c, "Opiskelija", keys);
+        PreparedStatement s = StatementBuilder.findAllIn(c, "Users", keys);
         ResultSet rs = s.executeQuery();
         
         if(rs == null) {
@@ -116,16 +114,16 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
         
         while(rs.next()) {
             Integer id = rs.getInt("id");
-            String nimi = rs.getString("nimi");
+            String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
 
-            opiskelijat.add(new Opiskelija(id, nimi, pwHash));
+            users.add(new User(id, name, pwHash));
         }
         
         s.close();
         c.close();
         
-        return opiskelijat;
+        return users;
     }
 
     @Override
@@ -133,13 +131,13 @@ public class OpiskelijaDao implements IDao<Opiskelija, Integer> {
         // ei toteutettu
     }
     
-    public void insert(String nimi, String pw) throws Exception {
+    public void insert(String name, String pw) throws Exception {
         String pwHash = Auth.hashPassword(pw);
         
         Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.insert(c, "Opiskelija", Arrays.asList("nimi", "pw_hash"));
+        PreparedStatement s = StatementBuilder.insert(c, "Users", Arrays.asList("name", "pw_hash"));
         
-        s.setObject(1, nimi);
+        s.setObject(1, name);
         s.setObject(2, pwHash);
         
         s.execute();

@@ -12,33 +12,33 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import tikape.keskustelufoorumi.domain.Alue;
-import tikape.keskustelufoorumi.domain.Opiskelija;
+import tikape.keskustelufoorumi.domain.Category;
+import tikape.keskustelufoorumi.domain.User;
 
-public class AlueDao implements IDao<Alue, Integer> {
+public class CategoryDao implements IDao<Category, Integer> {
     private Database database;
 
-    public AlueDao(Database database) {
+    public CategoryDao(Database database) {
         this.database = database;
     }
     
     @Override
-    public Alue findOne(Integer key) {
+    public Category findOne(Integer key) {
         return null;
     }
     
     @Override
-    public Alue findOneBy(String key, Object value) {
+    public Category findOneBy(String key, Object value) {
         return null;
     }
     
     @Override
-    public List<Alue> findAll() throws SQLException {
+    public List<Category> findAll() throws SQLException {
         return null;
     }
     
     @Override
-    public List<Alue> findAllIn(Collection<Integer> keys) throws SQLException {
+    public List<Category> findAllIn(Collection<Integer> keys) throws SQLException {
         return null;
     }
     
