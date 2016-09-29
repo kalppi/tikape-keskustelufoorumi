@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
@@ -43,6 +43,7 @@ public class WebUI implements UI {
         this.database = database;
     }
     
+    @Override
     public void init() throws SQLException {
         this.opiskelijaDao = new OpiskelijaDao(this.database);
         this.accessTokenDao = new AccessTokenDao(this.database);
@@ -117,10 +118,10 @@ public class WebUI implements UI {
         s.attribute("info", null);
         s.attribute("warning", null);
         
-        Menu menu = this.menu.buildWithContext(ctx);
+        Menu userMenu = this.menu.buildWithContext(ctx);
         
-        ctx.setMenu(menu);
-        map.put("menu", menu);
+        ctx.setMenu(userMenu);
+        map.put("menu", userMenu);
         
         ctx.setReqRes(req, res);
         
@@ -143,7 +144,7 @@ public class WebUI implements UI {
         return simpleView(active, layout, null);
     }
     
-    private TemplateViewRoute simpleView(String active, String layout, BiConsumer<Context, HashMap> fnc) { 
+    private TemplateViewRoute simpleView(String active, String layout, Consumer<Context> fnc) { 
         return (req, res) -> {
             Context ctx = getContext(req, res);
             ctx.getMenu().setActive(active);
@@ -153,7 +154,7 @@ public class WebUI implements UI {
             ModelAndView mv = new ModelAndView(map, layout);
             
             if(fnc != null) {
-                fnc.accept(ctx, map);
+                fnc.accept(ctx);
             }
             
             return mv;
@@ -163,7 +164,9 @@ public class WebUI implements UI {
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
-        get("/", simpleView("home", "index", (Context ctx, HashMap map) -> {
+        get("/", simpleView("home", "index", (Context ctx) -> {
+            HashMap map = ctx.getMap();
+            
             List<Alue> alueet = new ArrayList();
             alueet.add(new Alue(1, "perunakellarien iltahuvit"));
             alueet.add(new Alue(2, "tomaattien maailmanvalloitus"));
@@ -174,14 +177,20 @@ public class WebUI implements UI {
         
         get("/kayttajat", simpleView("users", "kayttajat"), engine);
         
-        get("/kirjaudu", simpleView("login", "kirjaudu", (Context ctx, HashMap map) -> {            
-            map.put("login-name", ctx.getRequest().session().attribute("login-name"));
-            ctx.getRequest().session().attribute("login-name", null);
+        get("/kirjaudu", simpleView("login", "kirjaudu", (Context ctx) -> {     
+            Request req = ctx.getRequest();
+            HashMap map = ctx.getMap();
+            
+            map.put("login-name", req.session().attribute("login-name"));
+            req.session().attribute("login-name", null);
         }), engine);
         
-        get("/rekisteroidy", simpleView("register", "rekisteroidy", (Context ctx, HashMap map) -> {
-            map.put("register-name", ctx.getRequest().session().attribute("register-name"));
-            ctx.getRequest().session().attribute("register-name", null);
+        get("/rekisteroidy", simpleView("register", "rekisteroidy", (Context ctx) -> {
+            Request req = ctx.getRequest();
+            HashMap map = ctx.getMap();
+            
+            map.put("register-name", req.session().attribute("register-name"));
+            req.session().attribute("register-name", null);
         }), engine);
                 
         get("/alue/:id", (req, res) -> {
@@ -193,7 +202,6 @@ public class WebUI implements UI {
             
             if(ctx.getAccessToken() != null) {
                 logout(res, ctx);
-                //req.session().attribute("success", "Uloskirjautuminen onnistui");
                 res.redirect("/");
             }
             
