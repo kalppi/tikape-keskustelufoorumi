@@ -44,8 +44,20 @@ public class Menu {
         return this.active;
     }
     
+    public void removeActive() {
+        this.active = null;
+    }
+    
+    public Boolean getItemExists(String key) {
+        return this.items.containsKey(key);
+    }
+    
     public MenuItem getActiveItem() {
-        return this.items.get(this.active);
+        if(this.items.containsKey(this.active)) {
+            return this.items.get(this.active);
+        } else {
+            return null;
+        }
     }
     
     public Menu buildWithContext(Context ctx) {

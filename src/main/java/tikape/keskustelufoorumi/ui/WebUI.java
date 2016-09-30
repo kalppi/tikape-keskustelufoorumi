@@ -181,13 +181,22 @@ public class WebUI implements UI {
     private TemplateViewRoute simpleView(String active, String layout, Consumer<Context> fnc) { 
         return (req, res) -> {
             Context ctx = getContext(req, res);
-            ctx.getMenu().setActive(active);
             
+            Menu menu = ctx.getMenu();
+            HashMap map = ctx.getMap();
+            
+            if(menu.getItemExists(active)) {
+                menu.setActive(active);
+            } else {
+                menu.removeActive();
+                map.put("title", active);
+            }
+
             if(fnc != null) {
                 fnc.accept(ctx);
             }
             
-            return new ModelAndView(ctx.getMap(), layout);
+            return new ModelAndView(map, layout);
         };
     }
     
@@ -205,13 +214,21 @@ public class WebUI implements UI {
                 return null;
             }
             
-            ctx.getMenu().setActive(active);
+            Menu menu = ctx.getMenu();
+            HashMap map = ctx.getMap();
+            
+            if(menu.getItemExists(active)) {
+                menu.setActive(active);
+            } else {
+                menu.removeActive();
+                map.put("title", active);
+            }
 
             if(fnc != null) {
                 fnc.accept(ctx);
             }
             
-            return new ModelAndView(ctx.getMap(), layout);
+            return new ModelAndView(map, layout);
         };
     }
     
@@ -262,7 +279,7 @@ public class WebUI implements UI {
             return null; 
         });
                 
-        get("/uusi-alue", restrictedView("home", "uusi-alue"), engine);
+        get("/uusi-alue", restrictedView("Uusi alue", "uusi-alue"), engine);
         
         post("/kirjaudu", simple((Context ctx) -> {
             Request req = ctx.getRequest();
@@ -300,7 +317,7 @@ public class WebUI implements UI {
                 
                 String error = null;
                 
-                User o = (User)this.categoryDao.findOneBy("name", name);
+                Category o = (Category)this.categoryDao.findOneBy("name", name);
                 
                 if(o != null) {
                     error = "saman nimien alue on jo olemassa";
