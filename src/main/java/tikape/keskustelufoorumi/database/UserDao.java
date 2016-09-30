@@ -32,8 +32,9 @@ public class UserDao implements IDao<User, Integer> {
             Integer id = rs.getInt("id");
             String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
+            Boolean admin = rs.getBoolean("admin");
 
-            User o = new User(id, name, pwHash);
+            User o = new User(id, name, pwHash, admin);
 
             s.close();
             c.close();
@@ -58,8 +59,9 @@ public class UserDao implements IDao<User, Integer> {
             Integer id = rs.getInt("id");
             String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
+            Boolean admin = rs.getBoolean("admin");
 
-            User o = new User(id, name, pwHash);
+            User o = new User(id, name, pwHash, admin);
 
             s.close();
             c.close();
@@ -81,8 +83,9 @@ public class UserDao implements IDao<User, Integer> {
             Integer id = rs.getInt("id");
             String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
+            Boolean admin = rs.getBoolean("admin");
 
-            users.add(new User(id, name, pwHash));
+            users.add(new User(id, name, pwHash, admin));
         }
         
         s.close();
@@ -111,8 +114,9 @@ public class UserDao implements IDao<User, Integer> {
             Integer id = rs.getInt("id");
             String name = rs.getString("name");
             String pwHash = rs.getString("pw_hash");
+            Boolean admin = rs.getBoolean("admin");
 
-            users.add(new User(id, name, pwHash));
+            users.add(new User(id, name, pwHash, admin));
         }
         
         s.close();

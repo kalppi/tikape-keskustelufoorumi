@@ -11,11 +11,13 @@ public class User {
     private Integer id;
     private String name;
     private String pwHash;
+    private Boolean admin;
 
-    public User(Integer id, String name, String pwHash) {
+    public User(Integer id, String name, String pwHash, Boolean admin) {
         this.id = id;
         this.name = name;
         this.pwHash = pwHash;
+        this.admin = admin;
     }
 
     public Integer getId() {
@@ -36,6 +38,10 @@ public class User {
     
     public String getPwHash() {
         return this.pwHash;
+    }
+    
+    public Boolean getAdmin() {
+        return this.admin;
     }
     
     @Override

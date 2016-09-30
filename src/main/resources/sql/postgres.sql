@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS Threads;
 DROP TABLE IF EXISTS Categories;
 DROP TABLE IF EXISTS Users;
 
-CREATE TABLE Users (id SERIAL PRIMARY KEY, name VARCHAR(255), pw_hash VARCHAR(88));
+CREATE TABLE Users (id SERIAL PRIMARY KEY, name VARCHAR(255), pw_hash VARCHAR(88), admin BOOLEAN);
 CREATE TABLE Categories (id SERIAL PRIMARY KEY, name VARCHAR(255));
 CREATE TABLE Threads (id SERIAL PRIMARY KEY, category_id INTEGER, title VARCHAR(255),
     FOREIGN KEY(category_id) REFERENCES Categories(id));
@@ -15,11 +15,12 @@ CREATE TABLE Message (id SERIAL PRIMARY KEY, user_id INTEGER, thread_id INTEGER,
 CREATE TABLE Access_tokens (id SERIAL PRIMARY KEY, token VARCHAR(44), user_id INTEGER,
     FOREIGN KEY(user_id) REFERENCES Users(id));
 
-INSERT INTO Users (name) VALUES ('Platon');
-INSERT INTO Users (name) VALUES ('Aristoteles');
-INSERT INTO Users (name) VALUES ('Homeros');
-INSERT INTO Users (name) VALUES ('Masa');
-INSERT INTO Users (name, pw_hash) VALUES ('jarnoluu', '9xgGv2tFo/9kboNxa8b2qKEU+4HMVz6s4AHzrjCpLL8=FVZkdBGDlzLg2H+DGlsWcsHGoQ8xIOGknqtiuB5BnII=');
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Platon', '', 0);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Aristoteles', '', 0);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Homeros', '', 0);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Masa', '', 0);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('jarnoluu', '9xgGv2tFo/9kboNxa8b2qKEU+4HMVz6s4AHzrjCpLL8=FVZkdBGDlzLg2H+DGlsWcsHGoQ8xIOGknqtiuB5BnII=', 1);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('admin', 'q1P0KA5MQwZ4DqpsSvFOxb+MTswRREjbc9gqlajedXE=ZX6KXGEyLbzmK/0GyqCJhyieCdNS/kCLrGfbbmvCDN4=', 1);
 
 INSERT INTO Categories (name) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanheitto');
 
