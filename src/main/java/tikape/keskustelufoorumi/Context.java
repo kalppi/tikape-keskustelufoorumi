@@ -67,4 +67,12 @@ public class Context {
         this.req = req;
         this.res = res;
     }
+
+    public Boolean isAdmin() {
+        if (this.loggedInUser == null || this.loggedInUser.getAdmin() == false) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
+import spark.Route;
 import spark.Session;
 import static spark.Spark.before;
 import spark.TemplateEngine;
@@ -28,10 +29,13 @@ import static spark.Spark.get;
 import static spark.Spark.halt;
 import static spark.Spark.post;
 import spark.TemplateViewRoute;
+import tikape.keskustelufoorumi.database.CategoryDao;
 
 public class WebUI implements UI {
     private Database database;
     private UserDao userDao;
+    private CateogoryDao categoryDao;
+    
     private AccessTokenDao accessTokenDao;
     
     private Menu menu;
@@ -44,6 +48,7 @@ public class WebUI implements UI {
     public void init() throws SQLException {
         this.userDao = new UserDao(this.database);
         this.accessTokenDao = new AccessTokenDao(this.database);
+        this.categoryDao = new CategoryDao(this.database);
         
         int port = 4567;
         
@@ -125,16 +130,48 @@ public class WebUI implements UI {
         return ctx;
     }
     
-    private void login(Response res, User o) throws SQLException {
-        String token = Auth.generateAccessToken();
-        this.accessTokenDao.insert(token, o.getId());
+    private Boolean login(Response res, User o) {
+        try {
+            String token = Auth.generateAccessToken();
+            this.accessTokenDao.insert(token, o.getId());
 
-        res.cookie("access_token", token, 60 * 60 * 24 * 7);
+            res.cookie("access_token", token, 60 * 60 * 24 * 7);
+        } catch(SQLException e) {
+            return false;
+        }
+        
+        return true;
     }
     
     private void logout(Response res, Context ctx) throws SQLException {
         this.accessTokenDao.delete(ctx.getAccessToken().getId());
         res.removeCookie("access_token");
+    }
+    
+    private Route simple(Consumer<Context> fnc) {
+        return (req, res) -> {
+            Context ctx = getContext(req, res);
+            
+            if(fnc != null) {
+                fnc.accept(ctx);
+            }
+            
+            return null;
+        };
+    }
+    
+    private Route restricted(Consumer<Context> fnc) {
+        return (req, res) -> {
+            Context ctx = getContext(req, res);
+            
+            if(!ctx.isAdmin()) {
+                halt(401);
+            } else if(fnc != null) {
+                fnc.accept(ctx);
+            }
+            
+            return null;
+        };
     }
     
     private TemplateViewRoute simpleView(String active, String layout) {
@@ -162,7 +199,7 @@ public class WebUI implements UI {
         return (req, res) -> {
             Context ctx = getContext(req, res);
             
-            if(!isAdmin(ctx)) {
+            if(!ctx.isAdmin()) {
                 halt(401);
                 
                 return null;
@@ -178,15 +215,6 @@ public class WebUI implements UI {
         };
     }
     
-    private Boolean isAdmin(Context ctx) {
-        User user = ctx.getLoggedInUser();
-        if(user == null || user.getAdmin() == false) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
@@ -236,7 +264,10 @@ public class WebUI implements UI {
                 
         get("/uusi-alue", restrictedView("home", "uusi-alue"), engine);
         
-        post("/kirjaudu", (req, res) -> {
+        post("/kirjaudu", simple((Context ctx) -> {
+            Request req = ctx.getRequest();
+            Response res = ctx.getResponse();
+            
             if(req.queryParams("login-ok") != null) {
                 String name = req.queryParams("login-name").trim();
                 String pw = req.queryParams("login-pw");
@@ -247,17 +278,46 @@ public class WebUI implements UI {
                     req.session().attribute("error", "Kirjautuminen epäonnistui: virheellinen käyttäjätunnus tai salasana");
                     res.redirect("/kirjaudu");
                 } else {
-                    login(res, o);
+                    if(login(res, o)) {
+                        req.session().attribute("success", "Kirjautuminen onnistui");
+                    } else {
+                        req.session().attribute("error", "Kirjautuminen epäonnistui: tuntematon syy");
+                    }
                     
-                    req.session().attribute("success", "Kirjautuminen onnistui");
                     res.redirect("/");
                 }
             }
-            
-            return null;
-        });
+        }));
         
-        post("/rekisteroidy", (req, res) -> {
+        post("/uusi-alue", restricted((Context ctx) -> {
+            Request req = ctx.getRequest();
+            
+            if(req.queryParams("category-ok") != null) {
+                String name = req.queryParams("category-name").trim();
+                
+                Validator nameValidator = new Validator();
+                nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla yli 3 merkkiä"));
+                
+                String error = null;
+                
+                User o = (User)this.categoryDao.findOneBy("name", name);
+                
+                if(o != null) {
+                    error = "saman nimien alue on jo olemassa";
+                } else if(!nameValidator.validate(name)) {
+                    error = nameValidator.getReason();
+                }
+                
+                if(error == null) {
+                    
+                }
+            }
+        }));
+        
+        post("/rekisteroidy", simple((Context ctx) -> {
+            Request req = ctx.getRequest();
+            Response res = ctx.getResponse();
+            
             if(req.queryParams("register-ok") != null) {
                 String name = req.queryParams("register-name").trim();
                 String pw = req.queryParams("register-pw");
@@ -294,21 +354,17 @@ public class WebUI implements UI {
                     }
                 }
                 
-                if(error != null) {
+                if(error == null) {
                     req.session().attribute("error", "Rekisteröityminen epäonnistui: " + error);
                     res.redirect("/rekisteroidy");
-                    
-                    return null;
+                } else {
+                    o = (User)this.userDao.findOneBy("name", name);
+                    login(res, o);
+
+                    req.session().attribute("success", "Rekisteröityminen onnistui");
+                    res.redirect("/");
                 }
-                
-                o = (User)this.userDao.findOneBy("name", name);
-                login(res, o);
-                
-                req.session().attribute("success", "Rekisteröityminen onnistui");
-                res.redirect("/");
             }
-                
-            return null;
-        });
+        }));
     }
 }

@@ -1,5 +1,15 @@
 {{>top}}
+
 <h2>Uusi alue</h2>
 
+<form action="/uusi-alue" method="post">
+    <div class="form-group"
+         ><label for="category-name">Nimi</label>
+        <input class="form-control" type="text" name="category-name" id="category-name" placeholder="Nimi" value="{{category-name}}" />
+    </div>
+    <div class="form-group">
+        <button name="category-ok" id="category-ok" class="btn btn-default">Luo</button>
+    </div>
+</form>
 
 {{>bottom}}
