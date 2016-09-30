@@ -34,7 +34,7 @@ import tikape.keskustelufoorumi.database.CategoryDao;
 public class WebUI implements UI {
     private Database database;
     private UserDao userDao;
-    private CateogoryDao categoryDao;
+    private CategoryDao categoryDao;
     
     private AccessTokenDao accessTokenDao;
     
