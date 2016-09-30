@@ -15,12 +15,12 @@ CREATE TABLE Messages (id SERIAL PRIMARY KEY, user_id INTEGER, thread_id INTEGER
 CREATE TABLE Access_tokens (id SERIAL PRIMARY KEY, token VARCHAR(44), user_id INTEGER,
     FOREIGN KEY(user_id) REFERENCES Users(id));
 
-INSERT INTO Users (name, pw_hash, admin) VALUES ('Platon', '', 0);
-INSERT INTO Users (name, pw_hash, admin) VALUES ('Aristoteles', '', 0);
-INSERT INTO Users (name, pw_hash, admin) VALUES ('Homeros', '', 0);
-INSERT INTO Users (name, pw_hash, admin) VALUES ('Masa', '', 0);
-INSERT INTO Users (name, pw_hash, admin) VALUES ('jarnoluu', '9xgGv2tFo/9kboNxa8b2qKEU+4HMVz6s4AHzrjCpLL8=FVZkdBGDlzLg2H+DGlsWcsHGoQ8xIOGknqtiuB5BnII=', 1);
-INSERT INTO Users (name, pw_hash, admin) VALUES ('admin', 'q1P0KA5MQwZ4DqpsSvFOxb+MTswRREjbc9gqlajedXE=ZX6KXGEyLbzmK/0GyqCJhyieCdNS/kCLrGfbbmvCDN4=', 1);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Platon', '', FALSE);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Aristoteles', '', FALSE);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Homeros', '', FALSE);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('Masa', '', FALSE);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('jarnoluu', '9xgGv2tFo/9kboNxa8b2qKEU+4HMVz6s4AHzrjCpLL8=FVZkdBGDlzLg2H+DGlsWcsHGoQ8xIOGknqtiuB5BnII=', TRUE);
+INSERT INTO Users (name, pw_hash, admin) VALUES ('admin', 'q1P0KA5MQwZ4DqpsSvFOxb+MTswRREjbc9gqlajedXE=ZX6KXGEyLbzmK/0GyqCJhyieCdNS/kCLrGfbbmvCDN4=', TRUE);
 
 INSERT INTO Categories (name) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanheitto');
 
