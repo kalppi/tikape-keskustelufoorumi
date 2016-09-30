@@ -247,15 +247,8 @@ public class WebUI implements UI {
         
         get("/", simpleView("home", "index", (Context ctx) -> {
             HashMap map = ctx.getMap();
-            
-            List<Category> categories = new ArrayList();
-            categories.add(new Category(1, "perunakellarien iltahuvit"));
-            categories.add(new Category(2, "tomaattien maailmanvalloitukset"));
-            categories.add(new Category(3, "kurkkusalaattien maihinnousut"));
-            categories.add(new Category(4, "mangojen karnevaalit"));
-            categories.add(new Category(5, "luumujen juhlahumut"));
-            categories.add(new Category(6, "kesäkurpitsojen lomakatkat"));
-            categories.add(new Category(7, "kirsikkojen päiväunet"));
+                        
+            List<Category> categories = this.categoryDao.findAll();
             
             map.put("categories", categories);
         }), engine);

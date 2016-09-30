@@ -104,7 +104,7 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
         
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findAll(c, "Users", Arrays.asList("*"), start, limit);
+            PreparedStatement s = StatementBuilder.findAll(c, "Users", Arrays.asList("*"), start, limit, "id" );
 
             ResultSet rs = s.executeQuery();
             while(rs.next()) {

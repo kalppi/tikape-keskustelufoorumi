@@ -73,7 +73,7 @@ public class MessageDao implements IDao<Message, Integer> {
         
         Connection c = this.database.getConnection();
         
-        List<String> fields =  Arrays.asList("id", "user_id", "thread_id", "text");
+        List<String> fields = new ArrayList(Arrays.asList("id", "user_id", "thread_id", "text"));
         
         if(this.database.isPostgres()) {
             fields.add("sent AT TIME ZONE 'Europe/Helsinki'");
@@ -121,6 +121,69 @@ public class MessageDao implements IDao<Message, Integer> {
         c.close();
         
         return viestit;
+    }
+    
+    public Map<Integer, Message> findLatestInCategories(Collection<Integer> keys) throws SQLException {
+        StringBuilder str = new StringBuilder("?");
+        for (int i = 1; i < keys.size(); i++) {
+            str.append(", ?");
+        }
+        
+        List<String> fields =  new ArrayList(Arrays.asList("m.id", "m.user_id", "m.thread_id", "m.text", "t.category_id"));
+        
+        if(this.database.isPostgres()) {
+            fields.add("m.sent AT TIME ZONE 'Europe/Helsinki'");
+        } else {
+            fields.add("DATETIME(m.sent, 'localtime') AS sent");
+        }
+        
+        System.out.println(String.join(",", fields));
+        
+        Connection c = this.database.getConnection();
+        PreparedStatement s = c.prepareStatement("SELECT " + String.join(",", fields) +
+    "        FROM (SELECT * FROM Messages ORDER BY sent ASC) m" +
+    "        LEFT JOIN Threads t ON t.id = m.thread_id" +
+    "        WHERE t.category_id IN (" + str + ")" +
+    "        GROUP BY t.category_id;");
+        
+        int i = 1;
+        for(Integer key : keys) {
+            s.setObject(i++, key);
+        }
+        
+        ResultSet rs = s.executeQuery();
+        
+        Map<Integer, Message> messages = new HashMap();
+        Map<Integer, List<Message>> userMap = new HashMap();
+        
+        while(rs.next()) {
+            Integer id = rs.getInt("id");
+            Integer userId = rs.getInt("user_id");
+            Integer threadId = rs.getInt("thread_id");
+            String text = rs.getString("text");
+            String sqlDate = rs.getString("sent");
+            LocalDateTime sent = Helper.parseSqlDate(sqlDate);
+            Integer categoryId = rs.getInt("category_id");
+            
+            Message message = new Message(id, null, threadId, sent, text);
+            messages.put(categoryId, message);
+            
+            if(!userMap.containsKey(userId)) {
+                userMap.put(userId, new ArrayList());
+            }
+            
+            userMap.get(userId).add(message);
+        }
+        
+        List<User> users = this.userDao.findAllIn(userMap.keySet());
+        
+        for(User u : users) {
+            for(Message m : userMap.get(u.getId())) {
+                m.setUser(u);
+            }
+        }
+        
+        return messages;
     }
     
     @Override

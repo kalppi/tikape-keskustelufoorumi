@@ -9,6 +9,8 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import spark.ModelAndView;
@@ -51,6 +53,19 @@ public class MyTemplate extends TemplateEngine {
                 } catch(Exception e) {
                     return "";
                 }
+            }
+        });
+        
+        this.engine.registerHelper("dt", new Helper<LocalDateTime>() {
+            public CharSequence apply(LocalDateTime dt, Options options) {
+                if(dt == null) {
+                    return "";
+                }
+                
+                String pattern = options.param(0, "dd.MM.yyyy HH:mm:ss");
+                
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+                return dt.format(formatter);
             }
         });
     }

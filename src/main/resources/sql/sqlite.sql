@@ -30,19 +30,19 @@ INSERT INTO Categories (name) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanh
 INSERT INTO Threads (category_id, title) VALUES (1, 'Ketju1'), (1, 'Ketju2'), (2, 'Ketju3');
 
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
-    (1, 1, datetime('now','-5 hours'), 'Everything is awesome'),
+    (1, 1, datetime('now','-5 hours'), 'ensimmäinen 1'),
     (2, 1, datetime('now','-4 hours'), 'Todellakin'),
     (3, 1, datetime('now','-3 hours'), 'Niinhän sitä sanotaan');
   
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
     (2, 2, datetime('now','-4 hours'), 'Tättärää'),
     (1, 2, datetime('now','-2 hours'), 'Tetteree!'),
-    (2, 2, datetime('now','-1 hours'), 'Tätätätätätää');
+    (2, 2, datetime('now','-1 hours'), 'viimeisin 1');
 
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
-    (3, 3, datetime('now','-5 hours'), 'aaaaaaa'),
+    (3, 3, datetime('now','-5 hours'), 'ensimmäinen 2'),
     (3, 3, datetime('now','-2 hours'), 'bbbbbb'),
-    (2, 3, datetime('now'), 'ccc');
+    (2, 3, datetime('now'), 'viimeisin 2');
 
 /*
 

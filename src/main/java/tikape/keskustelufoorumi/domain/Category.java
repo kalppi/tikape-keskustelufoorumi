@@ -2,15 +2,18 @@ package tikape.keskustelufoorumi.domain;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 public class Category {
     private Integer id;
     private String name;
+    private Integer messageCount;
+    private Message latestMessage;
     
-    public Category(Integer id, String name) {
+    public Category(Integer id, String name, Integer messageCount, Message latestMessage) {
         this.id = id;
         this.name = name;
+        this.messageCount = messageCount;
+        this.latestMessage = latestMessage;
     }
     
     public Integer getId() {
@@ -22,11 +25,26 @@ public class Category {
     }
     
     public Integer getPostCount() {
-        return (int)(Math.random() * 10);
+        return this.messageCount;
     }
     
-    public String getLatestPostTime() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        return new Message(1, null, 0, LocalDateTime.now(), "asdasd").getSent().format(formatter);
+    public Message getLatestMessage() {
+        return this.latestMessage;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setMessageCount(Integer messageCount) {
+        this.messageCount = messageCount;
+    }
+
+    public void setLatestMessage(Message latestMessage) {
+        this.latestMessage = latestMessage;
     }
 }

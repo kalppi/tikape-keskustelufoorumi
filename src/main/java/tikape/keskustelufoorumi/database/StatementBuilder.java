@@ -25,8 +25,8 @@ public class StatementBuilder {
         return connection.prepareStatement("SELECT " + String.join(",", fields) + " FROM " + table + " ORDER BY id ASC");
     }
     
-    public static <K> PreparedStatement findAll(Connection connection, String table, List<String> fields, Integer start, Integer limit) throws SQLException {
-        return connection.prepareStatement("SELECT " + String.join(",", fields) + " FROM " + table + " ORDER BY id ASC LIMIT " + limit + " OFFSET " + start);
+    public static <K> PreparedStatement findAll(Connection connection, String table, List<String> fields, Integer start, Integer limit, String orderField) throws SQLException {
+        return connection.prepareStatement("SELECT " + String.join(",", fields) + " FROM " + table + " ORDER BY " + orderField + " ASC LIMIT " + limit + " OFFSET " + start);
     }
     
     public static <K> PreparedStatement findAllIn(Connection connection, String table, Collection<K> keys, List<String> fields) throws SQLException {
