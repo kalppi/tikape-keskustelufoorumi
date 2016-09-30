@@ -371,7 +371,7 @@ public class WebUI implements UI {
                     }
                 }
                 
-                if(error == null) {
+                if(error != null) {
                     req.session().attribute("error", "Rekisteröityminen epäonnistui: " + error);
                     res.redirect("/rekisteroidy");
                 } else {
