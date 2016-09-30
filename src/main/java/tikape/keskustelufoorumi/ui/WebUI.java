@@ -97,7 +97,7 @@ public class WebUI implements UI {
                 ctx.setAccessToken(token);
                 ctx.setLoggedInUser(user);
                 
-                map.put("user", ctx.getLoggedInUser());
+                map.put("user", user);
             }
         }
         
