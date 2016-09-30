@@ -28,7 +28,7 @@ public class MessageDao implements IDao<Message, Integer> {
     public Message findOne(Integer key) {
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOne(c, "Messages", key);
+            PreparedStatement s = StatementBuilder.findOne(c, "Messages", key, Arrays.asList("*"));
             ResultSet rs = s.executeQuery();
 
             if(!rs.next()) {

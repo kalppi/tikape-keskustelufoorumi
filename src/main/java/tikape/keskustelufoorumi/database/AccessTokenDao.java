@@ -30,7 +30,7 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
     public AccessToken findOneBy(String key, Object value) {
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOneBy(c, "Access_tokens", key, value);
+            PreparedStatement s = StatementBuilder.findOneBy(c, "Access_tokens", key, value, Arrays.asList("*"));
             
             ResultSet rs = s.executeQuery();
             if(!rs.next()) {

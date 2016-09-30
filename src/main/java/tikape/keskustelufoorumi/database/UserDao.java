@@ -11,7 +11,7 @@ import java.util.List;
 import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.domain.User;
 
-public class UserDao implements IDao<User, Integer> {
+public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
     private Database database;
 
     public UserDao(Database database) throws SQLException {
@@ -22,7 +22,7 @@ public class UserDao implements IDao<User, Integer> {
     public User findOne(Integer key) {   
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOne(c, "Users", key);
+            PreparedStatement s = StatementBuilder.findOne(c, "Users", key, Arrays.asList("*"));
 
             ResultSet rs = s.executeQuery();
             if(!rs.next()) {
@@ -49,7 +49,7 @@ public class UserDao implements IDao<User, Integer> {
     public User findOneBy(String key, Object value) {
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOneBy(c, "Users", key, value);
+            PreparedStatement s = StatementBuilder.findOneBy(c, "Users", key, value, Arrays.asList("*"));
 
             ResultSet rs = s.executeQuery();
             if(!rs.next()) {
@@ -73,25 +73,56 @@ public class UserDao implements IDao<User, Integer> {
     }
 
     @Override
-    public List<User> findAll() throws SQLException {
-        Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findAll(c, "Users");
-
-        ResultSet rs = s.executeQuery();
+    public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        while(rs.next()) {
-            Integer id = rs.getInt("id");
-            String name = rs.getString("name");
-            String pwHash = rs.getString("pw_hash");
-            Boolean admin = rs.getBoolean("admin");
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = StatementBuilder.findAll(c, "Users", Arrays.asList("*"));
 
-            users.add(new User(id, name, pwHash, admin));
+            ResultSet rs = s.executeQuery();
+            while(rs.next()) {
+                Integer id = rs.getInt("id");
+                String name = rs.getString("name");
+                String pwHash = rs.getString("pw_hash");
+                Boolean admin = rs.getBoolean("admin");
+
+                users.add(new User(id, name, pwHash, admin));
+            }
+
+            s.close();
+            c.close();
+
+            return users;
+        } catch(SQLException e) {
+            return users;
         }
+    }
+    
+    @Override
+    public List<User> findAll(Integer start, Integer limit) {
+        List<User> users = new ArrayList<>();
         
-        s.close();
-        c.close();
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = StatementBuilder.findAll(c, "Users", Arrays.asList("*"), start, limit);
 
-        return users;
+            ResultSet rs = s.executeQuery();
+            while(rs.next()) {
+                Integer id = rs.getInt("id");
+                String name = rs.getString("name");
+                String pwHash = rs.getString("pw_hash");
+                Boolean admin = rs.getBoolean("admin");
+
+                users.add(new User(id, name, pwHash, admin));
+            }
+
+            s.close();
+            c.close();
+
+            return users;
+        } catch(SQLException e) {
+            return users;
+        }
     }
     
     @Override
@@ -103,7 +134,7 @@ public class UserDao implements IDao<User, Integer> {
         List<User> users = new ArrayList();
         
         Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.findAllIn(c, "Users", keys);
+        PreparedStatement s = StatementBuilder.findAllIn(c, "Users", keys, Arrays.asList("*"));
         ResultSet rs = s.executeQuery();
         
         if(rs == null) {

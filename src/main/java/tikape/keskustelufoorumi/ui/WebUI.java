@@ -80,7 +80,16 @@ public class WebUI implements UI {
             Integer id = Integer.parseInt(parts[0]);
             return id;
         } catch(Exception e) {
-            return null;
+            return 0;
+        }
+    }
+    
+    private Integer extractPage(String text) {
+        try {
+            Integer id = Integer.parseInt(text.replace("sivu-", ""));
+            return id;
+        } catch(Exception e) {
+            return 0;
         }
     }
     
@@ -235,18 +244,34 @@ public class WebUI implements UI {
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
+        
         get("/", simpleView("home", "index", (Context ctx) -> {
             HashMap map = ctx.getMap();
             
             List<Category> categories = new ArrayList();
             categories.add(new Category(1, "perunakellarien iltahuvit"));
-            categories.add(new Category(2, "tomaattien maailmanvalloitus"));
-            categories.add(new Category(3, "kurkkusalaattien maihinnousu"));
+            categories.add(new Category(2, "tomaattien maailmanvalloitukset"));
+            categories.add(new Category(3, "kurkkusalaattien maihinnousut"));
+            categories.add(new Category(4, "mangojen karnevaalit"));
+            categories.add(new Category(5, "luumujen juhlahumut"));
+            categories.add(new Category(6, "kesäkurpitsojen lomakatkat"));
+            categories.add(new Category(7, "kirsikkojen päiväunet"));
             
             map.put("categories", categories);
         }), engine);
         
-        get("/kayttajat", simpleView("users", "kayttajat"), engine);
+        get("/kayttajat", simpleView("users", "kayttajat", (Context ctx) -> {
+            List<User> users = this.userDao.findAll(0, 3);
+            
+            ctx.getMap().put("users", users);
+        }), engine);
+        
+        get("/kayttajat/:sivu", simpleView("users", "kayttajat", (Context ctx) -> {
+            Integer page = extractPage(ctx.getRequest().params(":sivu"));
+            List<User> users = this.userDao.findAll((page - 1) * 3, 3);
+            
+            ctx.getMap().put("users", users);
+        }), engine);
         
         get("/kirjaudu", simpleView("login", "kirjaudu", (Context ctx) -> {     
             Request req = ctx.getRequest();
