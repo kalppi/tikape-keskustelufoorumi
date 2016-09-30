@@ -9,6 +9,7 @@ import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.Session;
+import static spark.Spark.before;
 import spark.TemplateEngine;
 import tikape.keskustelufoorumi.MyTemplate;
 import static spark.Spark.port;
@@ -24,6 +25,7 @@ import tikape.keskustelufoorumi.database.AccessTokenDao;
 import tikape.keskustelufoorumi.domain.AccessToken;
 import tikape.keskustelufoorumi.validator.EqualsRule;
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.post;
 import spark.TemplateViewRoute;
 
@@ -144,16 +146,45 @@ public class WebUI implements UI {
             Context ctx = getContext(req, res);
             ctx.getMenu().setActive(active);
             
-            HashMap map = ctx.getMap(); 
-            
-            ModelAndView mv = new ModelAndView(map, layout);
-            
             if(fnc != null) {
                 fnc.accept(ctx);
             }
             
-            return mv;
+            return new ModelAndView(ctx.getMap(), layout);
         };
+    }
+    
+    private TemplateViewRoute restrictedView(String active, String layout) {
+        return restrictedView(active, layout, null);
+    }
+    
+    private TemplateViewRoute restrictedView(String active, String layout, Consumer<Context> fnc) { 
+        return (req, res) -> {
+            Context ctx = getContext(req, res);
+            
+            if(!isAdmin(ctx)) {
+                halt(401);
+                
+                return null;
+            }
+            
+            ctx.getMenu().setActive(active);
+
+            if(fnc != null) {
+                fnc.accept(ctx);
+            }
+            
+            return new ModelAndView(ctx.getMap(), layout);
+        };
+    }
+    
+    private Boolean isAdmin(Context ctx) {
+        User user = ctx.getLoggedInUser();
+        if(user == null || user.getAdmin() == false) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void start() {
@@ -202,6 +233,8 @@ public class WebUI implements UI {
             
             return null; 
         });
+                
+        get("/uusi-alue", restrictedView("home", "uusi-alue"), engine);
         
         post("/kirjaudu", (req, res) -> {
             if(req.queryParams("login-ok") != null) {
@@ -255,7 +288,7 @@ public class WebUI implements UI {
                 
                 if(error == null) {
                     try {
-                        userDao.insert(name, pw);
+                        userDao.insert(name, pw, false);
                     } catch(Exception e) {
                         error = "tuntematon syy";
                     }

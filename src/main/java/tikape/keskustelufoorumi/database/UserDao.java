@@ -130,14 +130,15 @@ public class UserDao implements IDao<User, Integer> {
         // ei toteutettu
     }
     
-    public void insert(String name, String pw) throws Exception {
+    public void insert(String name, String pw, Boolean admin) throws Exception {
         String pwHash = Auth.hashPassword(pw);
         
         Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.insert(c, "Users", Arrays.asList("name", "pw_hash"));
+        PreparedStatement s = StatementBuilder.insert(c, "Users", Arrays.asList("name", "pw_hash", "admin"));
         
         s.setObject(1, name);
         s.setObject(2, pwHash);
+        s.setObject(3, admin);
         
         s.execute();
     }
