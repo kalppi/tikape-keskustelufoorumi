@@ -43,7 +43,7 @@ public class CategoryDao implements IDao<Category, Integer> {
                 "FROM Categories a " +
                 "LEFT JOIN Threads k ON k.category_id = a.id " +
                 "LEFT JOIN Messages v ON k.id = v.thread_id " +
-                "GROUP BY a.id;");
+                "GROUP BY a.id ORDER BY a.id ASC;");
 
             ResultSet rs = s.executeQuery();
             

@@ -10,9 +10,11 @@ import tikape.keskustelufoorumi.database.Database;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String jdbcOsoite = "jdbc:sqlite:keskustelufoorumi.db";
-        String username = "";
-        String password = "";
+        //String jdbc = "jdbc:sqlite:keskustelufoorumi.db";
+        String jdbc = "jdbc:postgresql:tikape";
+        
+        String username = "tikape";
+        String password = "salasana";
         
         boolean production = false;
         
@@ -23,10 +25,10 @@ public class Main {
 
             username = dbUri.getUserInfo().split(":")[0];
             password = dbUri.getUserInfo().split(":")[1];
-            jdbcOsoite = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+            jdbc = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
         } 
         
-        Database database = new Database(jdbcOsoite, username, password);
+        Database database = new Database(jdbc, username, password);
         database.init();
         
         List<UI> uis = new ArrayList();
