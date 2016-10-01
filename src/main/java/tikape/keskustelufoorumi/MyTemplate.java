@@ -58,14 +58,18 @@ public class MyTemplate extends TemplateEngine {
         
         this.engine.registerHelper("dt", new Helper<LocalDateTime>() {
             public CharSequence apply(LocalDateTime dt, Options options) {
-                if(dt == null) {
+                try {
+                    if(dt == null) {
+                        return "";
+                    }
+
+                    String pattern = options.param(0, "dd.MM.yyyy HH:mm:ss");
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+                    return dt.format(formatter);
+                } catch(Exception e) {
                     return "";
                 }
-                
-                String pattern = options.param(0, "dd.MM.yyyy HH:mm:ss");
-                
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-                return dt.format(formatter);
             }
         });
     }

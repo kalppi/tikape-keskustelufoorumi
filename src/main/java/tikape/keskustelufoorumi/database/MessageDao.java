@@ -42,6 +42,7 @@ public class MessageDao implements IDao<Message, Integer> {
             String sqlDate = rs.getString("sent");
             LocalDateTime sent = Helper.parseSqlDate(sqlDate);
             
+            rs.close();
             s.close();
             c.close();
 
@@ -117,6 +118,7 @@ public class MessageDao implements IDao<Message, Integer> {
             }
         }
         
+        rs.close();
         s.close();
         c.close();
         
@@ -136,8 +138,6 @@ public class MessageDao implements IDao<Message, Integer> {
         } else {
             fields.add("DATETIME(m.sent, 'localtime') AS sent");
         }
-        
-        System.out.println(String.join(",", fields));
         
         Connection c = this.database.getConnection();
         PreparedStatement s = c.prepareStatement("SELECT " + String.join(",", fields) +
@@ -182,6 +182,10 @@ public class MessageDao implements IDao<Message, Integer> {
                 m.setUser(u);
             }
         }
+        
+        rs.close();
+        s.close();
+        c.close();
         
         return messages;
     }
