@@ -140,13 +140,11 @@ public class MessageDao implements IDao<Message, Integer> {
         }
         
         String sql = "SELECT " + String.join(",", fields) + " " +
-            "FROM (SELECT * FROM Messages ORDER BY sent ASC) m " +
+            "FROM Messages m " +
             "LEFT JOIN Threads t ON t.id = m.thread_id " +
             "WHERE t.category_id IN (" + str + ") " +
-            "GROUP BY t.category_id, m.id, m.user_id, m.thread_id, m.text, m.sent";
-        
-        System.out.println(sql);
-        
+            "GROUP BY t.category_id, m.id, m.user_id, m.thread_id, m.text, m.sent ORDER BY sent ASC";
+                
         Connection c = this.database.getConnection();
         PreparedStatement s = c.prepareStatement(sql);
         

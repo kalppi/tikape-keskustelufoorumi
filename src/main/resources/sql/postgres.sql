@@ -27,16 +27,21 @@ INSERT INTO Categories (name) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanh
 INSERT INTO Threads (category_id, title) VALUES (1, 'Ketju1'), (1, 'Ketju2'), (2, 'Ketju3');
 
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
-    (1, 1, now() - INTERVAL '5 hour', 'Everything is awesome'),
-    (2, 1, now() - INTERVAL '4 hour', 'Todellakin'),
+    (1, 1, now() - INTERVAL '10 hour', 'ensimmäinen 1'),
+    (1, 1, now() - INTERVAL '8 hour', 'Tetteree!'),
+    (2, 1, now() - INTERVAL '7 hour', 'Todellakin'),
     (3, 1, now() - INTERVAL '3 hour', 'Niinhän sitä sanotaan');
   
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
     (2, 2, now() - INTERVAL '4 hour', 'Tättärää'),
+    (1, 2, now() - INTERVAL '3 hour', 'Tetteree!'),
     (1, 2, now() - INTERVAL '2 hour', 'Tetteree!'),
-    (2, 2, now() - INTERVAL '1 hour', 'Tätätätätätää');
+    (1, 2, now() - INTERVAL '2 hour', 'Tetteree!'),
+    (1, 2, now() - INTERVAL '2 hour', 'Tetteree!'),
+    (2, 2, now() - INTERVAL '1 hour', 'viimeisin 1');
 
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
-    (3, 3, now() - INTERVAL '5 hour', 'aaaaaaa'),
-    (3, 3, now() - INTERVAL '25 hour', 'bbbbbb'),
-    (2, 3, now(), 'ccc');
+    (3, 3, now() - INTERVAL '12 hour', 'ensimmäinen 2'),
+    (3, 3, now() - INTERVAL '8 hour', 'bbbbbb'),
+    (3, 3, now() - INTERVAL '4 hour', 'bbbbbb'),
+    (2, 3, now(), 'viimeisin 2');
