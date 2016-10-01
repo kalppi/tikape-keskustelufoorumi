@@ -144,7 +144,7 @@ public class MessageDao implements IDao<Message, Integer> {
     "        FROM (SELECT * FROM Messages ORDER BY sent ASC) m" +
     "        LEFT JOIN Threads t ON t.id = m.thread_id" +
     "        WHERE t.category_id IN (" + str + ")" +
-    "        GROUP BY t.category_id, m.id, m.user_id, m.thread_id, m.text, sent;");
+    "        GROUP BY t.category_id, m.id, m.user_id, m.thread_id, m.text, m.sent;");
         
         int i = 1;
         for(Integer key : keys) {
@@ -161,8 +161,15 @@ public class MessageDao implements IDao<Message, Integer> {
             Integer userId = rs.getInt("user_id");
             Integer threadId = rs.getInt("thread_id");
             String text = rs.getString("text");
-            String sqlDate = rs.getString("sent");
-            LocalDateTime sent = Helper.parseSqlDate(sqlDate);
+            
+            LocalDateTime sent = null;
+            if(this.database.isPostgres()) {
+                sent = rs.getTimestamp("sent").toLocalDateTime();
+            } else {
+                String sqlDate = rs.getString("sent");
+                sent = Helper.parseSqlDate(sqlDate);
+            }
+              
             Integer categoryId = rs.getInt("category_id");
             
             Message message = new Message(id, null, threadId, sent, text);
