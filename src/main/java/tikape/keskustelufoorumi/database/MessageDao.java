@@ -144,7 +144,7 @@ public class MessageDao implements IDao<Message, Integer> {
     "        FROM (SELECT * FROM Messages ORDER BY sent ASC) m" +
     "        LEFT JOIN Threads t ON t.id = m.thread_id" +
     "        WHERE t.category_id IN (" + str + ")" +
-    "        GROUP BY t.category_id, m.id, m.user_id, m.thread_id, m.text, m.sent;");
+    "        GROUP BY t.category_id, m.id, m.user_id, m.thread_id, m.text, sent;");
         
         int i = 1;
         for(Integer key : keys) {
