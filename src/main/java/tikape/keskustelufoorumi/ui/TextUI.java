@@ -18,8 +18,8 @@ public class TextUI implements UI {
     private Database database;
     private Scanner reader = null;
     private IDao viestiDao = null;
-    private IDao kayttajaDao = null; //tama
-    private IDao ketjuDao = null; //tama
+    private IDao kayttajaDao = null;
+    private IDao ketjuDao = null;
     
     public TextUI(Database database) {
         this.database = database;
@@ -27,8 +27,8 @@ public class TextUI implements UI {
     
     public void init() throws SQLException {
         this.viestiDao = new MessageDao(this.database);
-        this.kayttajaDao = new UserDao(this.database); //tama
-        this.ketjuDao = new CategoryDao(this.database); //tama
+        this.kayttajaDao = new UserDao(this.database);
+        this.ketjuDao = new CategoryDao(this.database);
     }
     
     private List<Integer> getIds(String str) {
@@ -59,11 +59,13 @@ public class TextUI implements UI {
                 line = this.reader.nextLine();
             }
             
+            List<Integer> ids;
+            
             try {
                 String[] parts = line.split(" ");
                 switch(parts[0]) {
                     case "hae-viesti":
-                        List<Integer> ids = getIds(parts[1]);
+                        ids = getIds(parts[1]);
                         List<Message> vs = this.viestiDao.findAllIn(ids);
                         
                         for(Message v : vs) {
@@ -71,18 +73,18 @@ public class TextUI implements UI {
                         }
 
                         break;
-                    case "hae-käyttäjä": //nama
-                        List<Integer> idt = getIds(parts[1]);
-                        List<User> ut = this.kayttajaDao.findAllIn(idt);
+                    case "hae-käyttäjä":
+                        ids = getIds(parts[1]);
+                        List<User> ut = this.kayttajaDao.findAllIn(ids);
                         
                         for (User k : ut) {
                             System.out.println(k);
                         }
                         
                         break;
-                    case "hae-ketju": //nama
-                        List<Integer> iideet = getIds(parts[1]);
-                        List<Category> kt = this.ketjuDao.findAllIn(iideet);
+                    case "hae-ketju":
+                        ids = getIds(parts[1]);
+                        List<Category> kt = this.ketjuDao.findAllIn(ids);
                         
                         for (Category k : kt) {
                             System.out.println(k);
