@@ -4,16 +4,22 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import tikape.keskustelufoorumi.database.CategoryDao;
 import tikape.keskustelufoorumi.ui.UI;
 import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.MessageDao;
 import tikape.keskustelufoorumi.domain.Message;
 import tikape.keskustelufoorumi.database.IDao;
+import tikape.keskustelufoorumi.database.UserDao;
+import tikape.keskustelufoorumi.domain.Category;
+import tikape.keskustelufoorumi.domain.User;
 
 public class TextUI implements UI {
     private Database database;
     private Scanner reader = null;
     private IDao viestiDao = null;
+    private IDao kayttajaDao = null; //tama
+    private IDao ketjuDao = null; //tama
     
     public TextUI(Database database) {
         this.database = database;
@@ -21,6 +27,8 @@ public class TextUI implements UI {
     
     public void init() throws SQLException {
         this.viestiDao = new MessageDao(this.database);
+        this.kayttajaDao = new UserDao(this.database); //tama
+        this.ketjuDao = new CategoryDao(this.database); //tama
     }
     
     private List<Integer> getIds(String str) {
@@ -63,11 +71,22 @@ public class TextUI implements UI {
                         }
 
                         break;
-                    case "hae-käyttäjä":
+                    case "hae-käyttäjä": //nama
+                        List<Integer> idt = getIds(parts[1]);
+                        List<User> ut = this.kayttajaDao.findAllIn(idt);
+                        
+                        for (User k : ut) {
+                            System.out.println(k);
+                        }
                         
                         break;
-                    case "hae-ketju":
+                    case "hae-ketju": //nama
+                        List<Integer> iideet = getIds(parts[1]);
+                        List<Category> kt = this.ketjuDao.findAllIn(iideet);
                         
+                        for (Category k : kt) {
+                            System.out.println(k);
+                        }
                         break;
                 }
             } catch(Exception e) {
