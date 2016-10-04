@@ -35,6 +35,7 @@ public class WebUI implements UI {
     private Database database;
     private UserDao userDao;
     private CategoryDao categoryDao;
+    private MessageDao messageDao;
     
     private AccessTokenDao accessTokenDao;
     
@@ -49,6 +50,7 @@ public class WebUI implements UI {
         this.userDao = new UserDao(this.database);
         this.accessTokenDao = new AccessTokenDao(this.database);
         this.categoryDao = new CategoryDao(this.database);
+        this.messageDao = new MessageDao(this.database);
         
         int port = 4567;
         
@@ -282,7 +284,13 @@ public class WebUI implements UI {
             req.session().attribute("register-name", null);
         }), engine);
                 
-        get("/alue/:id", (req, res) -> {
+        get("/alue/:id", simpleView("home", "index", (Context ctx)) -> {
+            Request req = ctx.getRequest();
+            HashMap map = ctx.getMap();
+            
+            List<Message> messages = this.messageDao.findAll();
+            
+            
             return extractId(req.params(":id"));
         });
         
