@@ -78,4 +78,9 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
         
         s.execute();
     }
+
+    @Override
+    public List<AccessToken> findAllBy(String key, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

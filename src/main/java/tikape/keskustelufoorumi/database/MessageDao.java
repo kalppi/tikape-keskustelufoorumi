@@ -56,6 +56,8 @@ public class MessageDao implements IDao<Message, Integer> {
     
     @Override
     public Message findOneBy(String key, Object value) {
+        
+        
         return null;
     }
     
@@ -202,5 +204,10 @@ public class MessageDao implements IDao<Message, Integer> {
     @Override
     public void delete(Integer key) throws SQLException {
         // ei toteutettu
+    }
+
+    @Override
+    public List<Message> findAllBy(String key, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

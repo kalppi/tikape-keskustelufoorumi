@@ -30,6 +30,8 @@ import static spark.Spark.halt;
 import static spark.Spark.post;
 import spark.TemplateViewRoute;
 import tikape.keskustelufoorumi.database.CategoryDao;
+import tikape.keskustelufoorumi.database.MessageDao;
+import tikape.keskustelufoorumi.domain.Message;
 
 public class WebUI implements UI {
     private Database database;
@@ -284,15 +286,15 @@ public class WebUI implements UI {
             req.session().attribute("register-name", null);
         }), engine);
                 
-        get("/alue/:id", simpleView("home", "index", (Context ctx)) -> {
+        get("/alue/:id", simpleView("home", "index", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             
-            List<Message> messages = this.messageDao.findAll();
+            //List<Message> messages = this.messageDao.findAll();
             
             
-            return extractId(req.params(":id"));
-        });
+            //return extractId(req.params(":id"));
+        }), engine);
         
         get("/ulos", (req, res) -> {
             Context ctx = getContext(req, res);

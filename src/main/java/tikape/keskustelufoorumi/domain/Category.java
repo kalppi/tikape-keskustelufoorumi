@@ -2,12 +2,14 @@ package tikape.keskustelufoorumi.domain;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class Category {
     private Integer id;
     private String name;
     private Integer messageCount;
     private Message latestMessage;
+    private List<Thread> threads;
     
     public Category(Integer id, String name, Integer messageCount, Message latestMessage) {
         this.id = id;
@@ -32,6 +34,14 @@ public class Category {
         return this.latestMessage;
     }
 
+    public Integer getMessageCount() {
+        return messageCount;
+    }
+
+    public List<Thread> getThreads() {
+        return threads;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
@@ -47,4 +57,10 @@ public class Category {
     public void setLatestMessage(Message latestMessage) {
         this.latestMessage = latestMessage;
     }
+
+    public void setThreads(List<Thread> threads) {
+        this.threads = threads;
+    }
+    
+    
 }

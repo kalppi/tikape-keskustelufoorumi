@@ -10,6 +10,8 @@ public interface IDao<T, K> {
 
     List<T> findAll() throws SQLException;
     
+    List<T> findAllBy(String key, Object value);
+    
     List<T> findAllIn(Collection<K> keys) throws SQLException;
 
     void delete(K key) throws SQLException;

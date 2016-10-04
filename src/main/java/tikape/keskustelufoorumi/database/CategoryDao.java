@@ -24,7 +24,34 @@ public class CategoryDao implements IDao<Category, Integer> {
     }
     
     @Override
-    public Category findOne(Integer key) {  
+    public Category findOne(Integer key) {
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = c.prepareStatement("SELECT a.id, a.name, COUNT(v.id) AS message_count " +
+                    "FROM Categories a " +
+                    "LEFT JOIN Threads k ON k.category_id = a.id " +
+                    "LEFT JOIN Messages v ON k.id = v.thread_id " +
+                    "WHERE a.id = ?");
+            
+            s.setObject(1, key);
+            
+            ResultSet rs = s.executeQuery();
+            
+            if(!rs.next()) {
+                return null;
+            }
+            
+            Integer id = rs.getInt("id");
+            String name = rs.getString("name");
+            Integer messageCount = rs.getInt("message_count");
+            
+            Category cat = new Category(id, name, messageCount, null);
+            
+            return cat;
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        
         return null;
     }
     
@@ -85,5 +112,10 @@ public class CategoryDao implements IDao<Category, Integer> {
     @Override
     public void delete(Integer key) throws SQLException {
         // ei toteutettu
+    }
+
+    @Override
+    public List<Category> findAllBy(String key, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
