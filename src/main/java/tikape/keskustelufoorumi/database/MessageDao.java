@@ -46,9 +46,9 @@ public class MessageDao implements IDao<Message, Integer> {
             s.close();
             c.close();
 
-            User opiskelija = this.userDao.findOne(userId);
+            User user = this.userDao.findOne(userId);
 
-            return new Message(id, opiskelija, threadId, sent, text);
+            return new Message(id, user, threadId, sent, text);
         } catch(SQLException e) {
             return null;
         }
@@ -56,7 +56,33 @@ public class MessageDao implements IDao<Message, Integer> {
     
     @Override
     public Message findOneBy(String key, Object value) {
-        return null;
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = StatementBuilder.findOneBy(c, "Messages", key, value, Arrays.asList("*"));
+
+            ResultSet rs = s.executeQuery();
+            if(!rs.next()) {
+                return null;
+            }
+
+            Integer id = rs.getInt("id");
+            Integer userId = rs.getInt("user_id");
+            Integer threadId = rs.getInt("thread_id");
+            String text = rs.getString("text");
+            String sqlDate = rs.getString("sent");
+            LocalDateTime sent = Helper.parseSqlDate(sqlDate);
+            
+            rs.close();
+            s.close();
+            c.close();
+
+            User user = this.userDao.findOne(userId);
+            
+            return new Message(id, user, threadId, sent, text);
+            
+        } catch(SQLException e) {
+            return null;
+        }
     }
     
     @Override
