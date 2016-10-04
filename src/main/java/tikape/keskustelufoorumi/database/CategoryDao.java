@@ -24,7 +24,7 @@ public class CategoryDao implements IDao<Category, Integer> {
     }
     
     @Override
-    public Category findOne(Integer key) {
+    public Category findOne(Integer key) {  
         return null;
     }
     

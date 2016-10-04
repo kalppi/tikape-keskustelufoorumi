@@ -10,8 +10,8 @@ import tikape.keskustelufoorumi.database.Database;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        //String jdbc = "jdbc:sqlite:keskustelufoorumi.db";
-        String jdbc = "jdbc:postgresql:tikape";
+        String jdbc = "jdbc:sqlite:keskustelufoorumi.db";
+        //String jdbc = "jdbc:postgresql:tikape";
         
         String username = "tikape";
         String password = "salasana";
