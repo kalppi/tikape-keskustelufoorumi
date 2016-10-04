@@ -1,0 +1,18 @@
+{{>top}}
+
+<h2>Alue</h2>
+
+<table class="table">
+    <tr>
+        <th>Alue: </th><th>Viestejä</th><th>Viimeisin viesti</th>
+    </tr>
+    {{#categories}}
+    <tr>
+        <td><a href="/alue/{{id}}-{{url-encode name}}">{{name}}</a></td>
+        <td>{{postCount}}</td>
+        <td>{{dt latestMessage.sent}}</td>
+    </tr>
+    {{/categories}}
+</table>
+
+{{>bottom}}
