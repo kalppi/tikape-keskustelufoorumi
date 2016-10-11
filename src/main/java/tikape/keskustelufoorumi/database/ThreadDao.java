@@ -114,12 +114,6 @@ public class ThreadDao implements IDao<Thread, Integer>  {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    @Override
-    public List<Thread> findAll() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    
     public List<Thread> findAllInCategory(Integer cat) {
         List<Thread> threads = new ArrayList();
         

@@ -17,5 +17,15 @@ td.b {
 }
 
 .message {
-    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.message .name {
+    width: 80%;
+    font-weight: bold;
+}
+
+.message .sent {
+    width: 20%;
+    text-align: right;
 }

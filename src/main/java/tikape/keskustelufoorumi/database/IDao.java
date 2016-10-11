@@ -7,8 +7,6 @@ public interface IDao<T, K> {
     T findOne(K key);
     
     T findOneBy(String key, Object value);
-
-    List<T> findAll();
     
     List<T> findAllBy(String key, Object value);
     

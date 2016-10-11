@@ -67,7 +67,7 @@ public class WebUI implements UI {
         staticFileLocation("/public");
         
         this.menu = new Menu();
-        this.menu.addItem("home", "Etusivu", "/");
+        this.menu.addItem("home", "Keskustelu", "/");
         this.menu.addItem("users", "Käyttäjät", "/kayttajat");
         this.menu.addItem("login", "Kirjaudu", "/kirjaudu", (Context ctx) -> {
             return ctx.getLoggedInUser() == null;
@@ -293,7 +293,7 @@ public class WebUI implements UI {
             req.session().attribute("register-name", null);
         }), engine);
                 
-        get("/alue/:id", simpleView("", "alue", (Context ctx) -> {
+        get("/alue/:id", simpleView("home", "alue", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             
@@ -307,16 +307,18 @@ public class WebUI implements UI {
             map.put("threads", threads);
         }), engine);
         
-        get("/ketju/:id", simpleView("", "ketju", (Context ctx) -> {
+        get("/ketju/:id", simpleView("home", "ketju", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             
             Integer id = extractId(req.params(":id"));
             
             tikape.keskustelufoorumi.domain.Thread thread = this.threadDao.findOne(id);
+            Category category = this.categoryDao.findOne(thread.getCategory_id());
             List<Message> messages = this.messageDao.findAllInThread(id);
             
             map.put("title", "Ketju: " + thread.getTitle());
+            map.put("category", category);
             map.put("thread", thread);
             map.put("messages", messages);
         }), engine);

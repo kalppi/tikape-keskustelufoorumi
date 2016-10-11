@@ -1,12 +1,20 @@
 {{>top}}
 
-<h2>Ketju: {{thread.title}}</h2>
+<h2><a href="/">Keskustelu</a> / <a href="/alue/{{category.id}}-{{url-encode category.name}}">{{category.name}}</a> / {{thread.title}}</h2>
 
 
 {{#messages}}
-<div class="message">
-    {{tx text}}
-</div>
+<table class="message table">
+    <tr>
+        <td class="name">{{user.name}}</td>
+        <td class="sent">{{dt sent}}</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="text">
+            {{tx text}}
+        </td>
+    </tr>
+</table>
 {{/messages}}
 
 

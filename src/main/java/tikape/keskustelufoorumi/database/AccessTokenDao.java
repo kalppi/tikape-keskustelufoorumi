@@ -50,11 +50,6 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
     }
     
     @Override
-    public List<AccessToken> findAll() {
-        return null;
-    }
-    
-    @Override
     public List<AccessToken> findAllIn(Collection<Integer> keys) {
         return null;
     }

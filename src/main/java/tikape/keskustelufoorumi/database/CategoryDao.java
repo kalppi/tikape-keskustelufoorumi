@@ -67,14 +67,13 @@ public class CategoryDao implements IDao<Category, Integer> {
         return null;
     }
     
-    @Override
     public List<Category> findAll() {
         List<Category> categories = new ArrayList<>();
 
         String sql = null;
         
         if(this.database.isPostgres()) {
-            sql = "SELECT DISTINCT ON(c.id)"
+            sql = "SELECT DISTINCT ON(c.name)"
                     + "c.id AS c_id, c.name AS c_name, COUNT(m.id) OVER (PARTITION BY c.id) AS c_message_count, "
                     + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
                     + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin, "
@@ -84,7 +83,7 @@ public class CategoryDao implements IDao<Category, Integer> {
                     + "LEFT JOIN Messages m ON m.thread_id = t.id "
                     + "LEFT JOIN Users u ON u.id = m.user_id " 
                     + "GROUP BY c.id, m.id, u.id, t.id "
-                    + "ORDER BY c.id ASC, m.sent DESC;";
+                    + "ORDER BY c.name ASC, m.sent DESC;";
         } else {
            sql = "SELECT "
                 + "c.id AS c_id, c.name AS c_name, COUNT(m.id) AS c_message_count, "

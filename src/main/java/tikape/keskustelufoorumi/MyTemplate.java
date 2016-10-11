@@ -34,7 +34,7 @@ public class MyTemplate extends TemplateEngine {
         this.engine.registerHelper("url-encode", new Helper<String>() {
             public CharSequence apply(String text, Options options) {
                 try {
-                    return URLEncoder.encode(text, "UTF-8");
+                    return URLEncoder.encode(text, "UTF-8").toLowerCase();
                 } catch(UnsupportedEncodingException e) {
                     return text;
                 }

@@ -29,7 +29,7 @@ public class Main {
         } 
         
         Database database = new Database(jdbc, username, password);
-        database.init();
+        //database.init();
         
         List<UI> uis = new ArrayList();
         

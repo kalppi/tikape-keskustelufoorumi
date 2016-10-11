@@ -79,11 +79,6 @@ public class MessageDao implements IDao<Message, Integer> {
     }
     
     @Override
-    public List<Message> findAll() {
-        return null;
-    }
-    
-    @Override
     public List<Message> findAllIn(Collection<Integer> keys) {
         if(keys.isEmpty()) {
             return new ArrayList();

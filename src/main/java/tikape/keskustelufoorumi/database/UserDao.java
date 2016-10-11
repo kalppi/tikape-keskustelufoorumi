@@ -66,7 +66,6 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
         }
     }
 
-    @Override
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
         
