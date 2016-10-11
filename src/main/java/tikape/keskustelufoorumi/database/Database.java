@@ -6,11 +6,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import org.apache.commons.dbcp2.*;
 
 public class Database {
-    private String databaseAddress;
-    private String username;
-    private String password;
+    private BasicDataSource connectionPool;
+    //private String databaseAddress;
+    //private String username;
+    //private String password;
     
     // rumasti tehdään näin, eikä jakseta tehdä monesta luokasta kahta eri versiota
     private Boolean isPostgres;
@@ -20,11 +22,20 @@ public class Database {
     }
     
     public Database(String databaseAddress, String username, String password) {
-        this.databaseAddress = databaseAddress;
-        this.username = username;
-        this.password = password;
+        //this.databaseAddress = databaseAddress;
+        //this.username = username;
+        //this.password = password;
         
-        if(this.databaseAddress.contains("postgres")) {
+        this.connectionPool = new BasicDataSource();
+        this.connectionPool.setUsername(username);
+        this.connectionPool.setPassword(password);
+        this.connectionPool.setUrl(databaseAddress);
+        this.connectionPool.setDriverClassName("org.postgresql.Driver");
+        this.connectionPool.setInitialSize(3);
+        
+        System.out.println(this.connectionPool.getMaxTotal());
+        
+        if(databaseAddress.contains("postgres")) {
             this.isPostgres = true;
         } else {
             this.isPostgres = false;
@@ -36,13 +47,13 @@ public class Database {
     }
     
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(this.databaseAddress, this.username, this.password);
+        return this.connectionPool.getConnection();
+        //return DriverManager.getConnection(this.databaseAddress, this.username, this.password);
     }
 
     public void init() {
         List<String> lauseet = sqliteLauseet();
 
-        // "try with resources" sulkee resurssin automaattisesti lopuksi
         try (Connection conn = getConnection()) {
             Statement st = conn.createStatement();
 
@@ -53,7 +64,6 @@ public class Database {
             }
 
         } catch (Throwable t) {
-            // jos tietokantataulu on jo olemassa, ei komentoja suoriteta
             System.out.println("Error >> " + t.getMessage());
         }
     }
