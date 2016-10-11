@@ -7,9 +7,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import tikape.keskustelufoorumi.domain.Message;
 import tikape.keskustelufoorumi.domain.Thread;
 import tikape.keskustelufoorumi.domain.User;
@@ -27,7 +25,40 @@ public class ThreadDao implements IDao<Thread, Integer>  {
     
     @Override
     public Thread findOne(Integer key) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String sql = "SELECT DISTINCT ON (t.id) "
+                + "t.id AS t_id, t.category_id AS t_category_id, t.title AS t_title, COUNT(m.id) OVER (PARTITION BY t.id) AS t_message_count "
+                //+ "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
+                //+ "u.id AS u_id, u.name AS u_name, u.admin AS u_admin "
+                + "FROM Threads t "
+                + "LEFT JOIN Messages m ON t.id = m.thread_id "
+                //+ "LEFT JOIN Users u ON u.id = m.user_id "
+                + "WHERE t.id = ? "
+                + "GROUP BY t.id, m.id "
+                + "ORDER BY t.id ASC, m.sent DESC";
+        
+        try {
+            Connection c = this.database.getConnection();
+            
+            PreparedStatement s = c.prepareCall(sql);
+            s.setObject(1, key);
+            
+            ResultSet rs = s.executeQuery();
+            
+            if(!rs.next()) {
+                return null;
+            }
+            
+            Integer id = rs.getInt("t_id");
+            Integer categoryId = rs.getInt("t_category_id");
+            String title = rs.getString("t_title");
+            
+            Thread thread = new Thread(id, categoryId, title, null, null);
+            
+            return thread;
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

@@ -35,7 +35,6 @@ public class Database {
         return this.isPostgres;
     }
     
-    // tähän olisi hyvä jonkinlainen connection pooli, mutta varmaan turhan overkilli nyt
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(this.databaseAddress, this.username, this.password);
     }

@@ -27,13 +27,22 @@ public class CategoryDao implements IDao<Category, Integer> {
     
     @Override
     public Category findOne(Integer key) {
+        String sql = "SELECT DISTINCT ON(c.id) "
+                + "c.id AS c_id, c.name AS c_name, COUNT(m.id) OVER (PARTITION BY c.id) AS c_message_count, "
+                + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
+                + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin, "
+                + "t.id AS t_id "
+                + "FROM Categories c "
+                + "LEFT JOIN Threads t ON t.category_id = c.id "
+                + "LEFT JOIN Messages m ON m.thread_id = t.id "
+                + "LEFT JOIN Users u ON u.id = m.user_id "
+                + "WHERE c.id = ? "
+                + "GROUP BY c.id, m.id, u.id, t.id "
+                + "ORDER BY c.id ASC, m.sent DESC";
+        
         try {
             Connection c = this.database.getConnection();
-            PreparedStatement s = c.prepareStatement("SELECT a.id, a.name, COUNT(v.id) AS message_count " +
-                    "FROM Categories a " +
-                    "LEFT JOIN Threads k ON k.category_id = a.id " +
-                    "LEFT JOIN Messages v ON k.id = v.thread_id " +
-                    "WHERE a.id = ?");
+            PreparedStatement s = c.prepareStatement(sql);
             
             s.setObject(1, key);
             
@@ -43,9 +52,9 @@ public class CategoryDao implements IDao<Category, Integer> {
                 return null;
             }
             
-            Integer id = rs.getInt("id");
-            String name = rs.getString("name");
-            Integer messageCount = rs.getInt("message_count");
+            Integer id = rs.getInt("c_id");
+            String name = rs.getString("c_name");
+            Integer messageCount = rs.getInt("c_message_count");
             
             Category cat = new Category(id, name, messageCount, null);
             

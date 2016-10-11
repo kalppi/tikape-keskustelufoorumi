@@ -33,7 +33,7 @@ INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
     (3, 1, now() - INTERVAL '3 hour', 'Niinhän sitä sanotaan');
   
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
-    (2, 2, now() - INTERVAL '4 hour', 'Tättärää'),
+    (2, 2, now() - INTERVAL '4 hour', 'Tättärää <b>asdasd</b>'),
     (1, 2, now() - INTERVAL '3 hour', 'Tetteree!'),
     (1, 2, now() - INTERVAL '2 hour', 'Tetteree!'),
     (1, 2, now() - INTERVAL '2 hour', 'Tetteree!'),

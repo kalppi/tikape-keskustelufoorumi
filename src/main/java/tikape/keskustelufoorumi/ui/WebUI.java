@@ -34,6 +34,7 @@ import tikape.keskustelufoorumi.domain.Message;
 
 public class WebUI implements UI {
     private Database database;
+    
     private UserDao userDao;
     private CategoryDao categoryDao;
     private ThreadDao threadDao;
@@ -297,12 +298,27 @@ public class WebUI implements UI {
             HashMap map = ctx.getMap();
             
             Integer id = extractId(req.params(":id"));
-            
-            map.put("title", "Alue: " + id);
-            
+                        
+            Category cat = this.categoryDao.findOne(id);
             List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllInCategory(id);
             
+            map.put("title", "Alue: " + cat.getName());
+            map.put("category", cat);
             map.put("threads", threads);
+        }), engine);
+        
+        get("/ketju/:id", simpleView("", "ketju", (Context ctx) -> {
+            Request req = ctx.getRequest();
+            HashMap map = ctx.getMap();
+            
+            Integer id = extractId(req.params(":id"));
+            
+            tikape.keskustelufoorumi.domain.Thread thread = this.threadDao.findOne(id);
+            List<Message> messages = this.messageDao.findAllInThread(id);
+            
+            map.put("title", "Ketju: " + thread.getTitle());
+            map.put("thread", thread);
+            map.put("messages", messages);
         }), engine);
         
         get("/ulos", (req, res) -> {

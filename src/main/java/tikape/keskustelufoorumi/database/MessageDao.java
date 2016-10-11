@@ -151,6 +151,46 @@ public class MessageDao implements IDao<Message, Integer> {
         return viestit;
     }
     
+    public List<Message> findAllInThread(Integer id) {
+        List<Message> messages = new ArrayList();
+        String sql = "SELECT "
+                + "m.id AS m_id, m.text AS m_text, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, m.thread_id AS m_thread_id, "
+                + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin "
+                + "FROM Messages m "
+                + "LEFT JOIN Users u ON u.id = m.user_id "
+                + "WHERE m.thread_id = ? "
+                + "ORDER BY m.sent ASC";
+        
+        try {
+            Connection c = this.database.getConnection();
+            
+            PreparedStatement s = c.prepareStatement(sql);
+            s.setObject(1, id);
+            
+            ResultSet rs = s.executeQuery();
+            
+            while(rs.next()) {
+                Integer mId = rs.getInt("m_id");
+                Integer mThreadId = rs.getInt("m_thread_id");
+                LocalDateTime mSent = rs.getTimestamp("m_sent").toLocalDateTime();
+                String mText = rs.getString("m_text");
+                
+                Integer uId = rs.getInt("u_id");
+                String uName = rs.getString("u_name");
+                Boolean uAdmin = rs.getBoolean("u_admin");
+                
+                User user = new User(uId, uName, null, uAdmin);
+                Message message = new Message(mId, user, mThreadId, mSent, mText);
+                
+                messages.add(message);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return messages;
+    }
+    
     @Override
     public void delete(Integer key) throws SQLException {
         // ei toteutettu

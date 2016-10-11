@@ -41,7 +41,7 @@ public class Helper {
                 url = "http://" + url;
             }
             
-            url = "<a href=\"" + url + "\">" + m.group(0) + ">";
+            url = "<a href=\"" + url + "\">" + m.group(0) + "</a>";
             
             m.appendReplacement(result, url);
         }

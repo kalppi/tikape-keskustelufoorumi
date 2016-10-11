@@ -72,6 +72,18 @@ public class MyTemplate extends TemplateEngine {
                 }
             }
         });
+        
+        this.engine.registerHelper("tx", new Helper<String>() {
+            public CharSequence apply(String text, Options options) {
+                try {
+                    text = text.replace("<", "&lt;").replace(">", "&gt;");
+                    
+                    return new Handlebars.SafeString(tikape.keskustelufoorumi.Helper.linkify(text));
+                } catch(Exception e) {
+                    return "";
+                }
+            }
+        });
     }
     
     public String render(ModelAndView modelAndView) {
