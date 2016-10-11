@@ -33,8 +33,6 @@ public class Database {
         this.connectionPool.setDriverClassName("org.postgresql.Driver");
         this.connectionPool.setInitialSize(3);
         
-        System.out.println(this.connectionPool.getMaxTotal());
-        
         if(databaseAddress.contains("postgres")) {
             this.isPostgres = true;
         } else {

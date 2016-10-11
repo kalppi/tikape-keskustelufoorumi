@@ -296,16 +296,76 @@ public class WebUI implements UI {
         get("/alue/:id", simpleView("home", "alue", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
+            Session ses = req.session();
             
             Integer id = extractId(req.params(":id"));
                         
             Category cat = this.categoryDao.findOne(id);
             List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllInCategory(id);
             
+            map.put("thread-title", ses.attribute("thread-title"));
+            map.put("thread-text", ses.attribute("thread-text"));
+            
+            ses.attribute("thread-title", null);
+            ses.attribute("thread-text", null);
+            
             map.put("title", "Alue: " + cat.getName());
             map.put("category", cat);
             map.put("threads", threads);
         }), engine);
+        
+        //FIXME: restricted
+        post("/alue/:id", simple((Context ctx) -> {
+            Request req = ctx.getRequest();
+            Response res = ctx.getResponse();
+            
+            if(req.queryParams("thread-ok") != null) {
+                String title = req.queryParams("thread-title").trim();
+                String text = req.queryParams("thread-text").trim();
+                Session ses = req.session();
+                
+                Integer categoryId;
+                try {
+                    categoryId = Integer.parseInt(req.queryParams("thread-category-id"));
+                } catch(Exception e) {
+                    return;
+                }
+                
+                Validator titleValidator = new Validator();
+                titleValidator.addRule(new MinLengthRule(3, "otsikon pitää olla vähintään 3 merkkiä"));
+                titleValidator.addRule(new MaxLengthRule(255, "otsikko saa olla enintään 255 merkkiä"));
+                
+                Validator messageValidator = new Validator();
+                messageValidator.addRule(new MinLengthRule(3, "viestin pitää olla vähintään 3 merkkiä"));
+                messageValidator.addRule(new MaxLengthRule(2000, "viesti saa olla enintään 2000 merkkiä"));
+                
+                String error = null;
+                                
+                if(!titleValidator.validate(title)) {
+                    error = titleValidator.getReason();
+                } else if(!messageValidator.validate(text)) {
+                    error = messageValidator.getReason();
+                }
+                
+                ses.attribute("thread-title", title);
+                ses.attribute("thread-text", text);
+                
+                if(error == null) {
+                    try {
+                        this.threadDao.insert(categoryId, title, 1, text);
+                        
+                        ses.attribute("thread-title", null);
+                        ses.attribute("thread-text", null);
+                    } catch(Exception e) {
+                        ses.attribute("error", "Uuden ketjun luominen epäonnistui: tuntematon virhe");
+                    }
+                } else {
+                    ses.attribute("error", "Uuden ketjun luominen epäonnistui: " + error);
+                }
+                
+                res.redirect(req.url());
+            }
+        }));
         
         get("/ketju/:id", simpleView("home", "ketju", (Context ctx) -> {
             Request req = ctx.getRequest();
@@ -368,7 +428,7 @@ public class WebUI implements UI {
                 String name = req.queryParams("category-name").trim();
                 
                 Validator nameValidator = new Validator();
-                nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla yli 3 merkkiä"));
+                nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla vähintään 3 merkkiä"));
                 
                 String error = null;
                 
@@ -398,7 +458,7 @@ public class WebUI implements UI {
                 req.session().attribute("register-name", name);
                 
                 Validator nameValidator = new Validator();
-                nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla yli 3 merkkiä"));
+                nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla vähintään 3 merkkiä"));
                 nameValidator.addRule(new MaxLengthRule(20, "nimi ei saa olla yli 20 merkkiä pitkä"));
                 nameValidator.addRule(new PatternRule("^[a-zA-Z0-9]+$", "nimi saa sisältää vain kirjaimia ja numeroita"));
                 

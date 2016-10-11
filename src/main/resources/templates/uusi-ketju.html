@@ -1,0 +1,16 @@
+<h2>Uusi ketju</h2>
+
+<form action="/alue/{{category.id}}" method="post">
+    <input type="hidden" name="thread-category-id" value="{{category.id}}" />
+    <div class="form-group">
+        <label for="thread-title">Otsikko</label>
+        <input class="form-control" type="text" name="thread-title" id="thread-title" placeholder="Otsikko" value="{{thread-title}}" />
+    </div>
+    <div class="form-group">
+        <label for="thread-text">Viesti</label>
+        <textarea class="form-control" type="text" name="thread-text" id="thread-text" placeholder="Viesti">{{thread-text}}</textarea>
+    </div>
+    <div class="form-group">
+        <button name="thread-ok" id="thread-ok" class="btn btn-default">Lähetä</button>
+    </div>
+</form>

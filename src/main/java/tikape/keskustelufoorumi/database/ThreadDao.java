@@ -18,9 +18,11 @@ import tikape.keskustelufoorumi.domain.User;
  */
 public class ThreadDao implements IDao<Thread, Integer>  {
     private Database database;
+    private MessageDao messageDao;
     
-    public ThreadDao(Database database) {
+    public ThreadDao(Database database) throws SQLException {
         this.database = database;
+        this.messageDao = new MessageDao(database);
     }
     
     @Override
@@ -168,4 +170,45 @@ public class ThreadDao implements IDao<Thread, Integer>  {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    public void insert(Integer categoryId, String title, Integer userId, String text) throws Exception {
+        try (Connection c = this.database.getConnection()) {
+            c.setAutoCommit(false);
+            
+            Integer threadId;
+            try (PreparedStatement s = c.prepareStatement("INSERT INTO Threads (category_id, title) VALUES (?, ?) RETURNING id")) {
+                s.setObject(1, categoryId);
+                s.setObject(2, title);
+                
+                try (ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        throw new Exception();
+                    }
+                    
+                    threadId = rs.getInt("id");
+                } catch(Exception e) {
+                    c.rollback();
+                    c.setAutoCommit(true);
+                    throw e;
+                }
+            }
+            
+            try(PreparedStatement s = c.prepareStatement("INSERT INTO Messages (user_id, thread_id, text) VALUES (?, ?, ?)")) {
+                s.setObject(1, userId);
+                s.setObject(2, threadId);
+                s.setObject(3, text);
+                
+                s.executeUpdate();
+                c.commit();
+            } catch(Exception e) {
+                c.rollback();
+                
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 }
