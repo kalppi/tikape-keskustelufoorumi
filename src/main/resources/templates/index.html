@@ -4,13 +4,13 @@
 
 <table class="table">
     <tr>
-        <th>Nimi</th><th>Viestejä</th><th>Viimeisin</th>
+        <th class="a">Nimi</th><th class="b">Viestejä</th><th class="c">Viimeisin</th>
     </tr>
     {{#categories}}
     <tr>
-        <td><a href="/alue/{{id}}-{{url-encode name}}">{{name}}</a></td>
-        <td>{{postCount}}</td>
-        <td>{{dt latestMessage.sent}}</td>
+        <td class="a"><a href="/alue/{{id}}-{{url-encode name}}">{{name}}</a></td>
+        <td class="b">{{messageCount}}</td>
+        <td class="c">{{dt latestMessage.sent}}</td>
     </tr>
     {{/categories}}
 </table>

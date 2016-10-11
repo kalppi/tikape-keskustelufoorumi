@@ -1,20 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tikape.keskustelufoorumi.database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import tikape.keskustelufoorumi.domain.Message;
 import tikape.keskustelufoorumi.domain.Thread;
+import tikape.keskustelufoorumi.domain.User;
 
 /**
  *
@@ -34,7 +32,9 @@ public class ThreadDao implements IDao<Thread, Integer>  {
 
     @Override
     public List<Thread> findAllBy(String key, Object value) {
-        List<Thread> threads = null;
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        /*List<Thread> threads = null;
         
         try {
             Connection c = this.database.getConnection();
@@ -71,7 +71,7 @@ public class ThreadDao implements IDao<Thread, Integer>  {
         }
  
         
-        return threads;
+        return threads;*/
     }
 
     @Override
@@ -83,10 +83,61 @@ public class ThreadDao implements IDao<Thread, Integer>  {
     public void delete(Integer key) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public List<Thread> findAll() throws SQLException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
+    public List<Thread> findAllInCategory(Integer cat) {
+        List<Thread> threads = new ArrayList();
+        
+        String sql = "SELECT * FROM ("
+                + "SELECT DISTINCT ON (t.id) "
+                + "t.id AS t_id, t.category_id AS t_category_id, t.title AS t_title, COUNT(m.id) OVER (PARTITION BY t.id) AS t_message_count, "
+                + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
+                + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin "
+                + "FROM Threads t "
+                + "LEFT JOIN Messages m ON t.id = m.thread_id "
+                + "LEFT JOIN Users u ON u.id = m.user_id "
+                + "WHERE t.category_id = ? "
+                + "GROUP BY t.id, m.id, u.id "
+                + "ORDER BY t.id ASC, m.sent DESC"
+                + ") q ORDER BY m_sent DESC";
+        
+        try {
+            Connection c = this.database.getConnection();
+            PreparedStatement s = c.prepareStatement(sql);
+            
+            s.setObject(1, cat);
+            
+            ResultSet rs = s.executeQuery();
+            
+            while(rs.next()) {
+                Integer uId = rs.getInt("u_id");
+                String uName = rs.getString("u_name");
+                Boolean uAdmin = rs.getBoolean("u_admin");
+                
+                Integer mId = rs.getInt("m_id");
+                Integer tId = rs.getInt("t_id");
+                LocalDateTime sent = rs.getTimestamp("m_sent").toLocalDateTime();
+                
+                Integer tCategoryId = rs.getInt("t_category_id");
+                String title = rs.getString("t_title");
+                Integer messageCount = rs.getInt("t_message_count");
+                
+                User user = new User(uId, uName, null, uAdmin);
+                Message message = new Message(mId, user, tId, sent, null);
+                Thread thread = new Thread(tId, tCategoryId, title, messageCount, message);
+                
+                threads.add(thread);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return threads;
     }
 
     @Override

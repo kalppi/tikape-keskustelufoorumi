@@ -25,17 +25,13 @@ public class Category {
     public String getName() {
         return this.name;
     }
-    
-    public Integer getPostCount() {
-        return this.messageCount;
-    }
-    
+        
     public Message getLatestMessage() {
         return this.latestMessage;
     }
 
     public Integer getMessageCount() {
-        return messageCount;
+        return this.messageCount;
     }
 
     public List<Thread> getThreads() {

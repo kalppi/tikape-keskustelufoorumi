@@ -30,7 +30,7 @@ INSERT INTO Categories (name) VALUES ('Yleinen höpinä'), ('Keilaus'), ('Tikanh
 INSERT INTO Threads (category_id, title) VALUES (1, 'Ketju1'), (1, 'Ketju2'), (2, 'Ketju3');
 
 INSERT INTO Messages (user_id, thread_id, sent, text) VALUES
-    (1, 1, datetime('now','-5 hours'), 'ensimmäinen 1'),
+    (1, 1, datetime('now','-6 hours'), 'ensimmäinen 1'),
     (2, 1, datetime('now','-4 hours'), 'Todellakin'),
     (3, 1, datetime('now','-3 hours'), 'Niinhän sitä sanotaan');
   

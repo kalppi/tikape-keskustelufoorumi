@@ -1,7 +1,6 @@
 package tikape.keskustelufoorumi.ui;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -10,7 +9,6 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.Session;
-import static spark.Spark.before;
 import spark.TemplateEngine;
 import tikape.keskustelufoorumi.MyTemplate;
 import static spark.Spark.port;
@@ -31,12 +29,14 @@ import static spark.Spark.post;
 import spark.TemplateViewRoute;
 import tikape.keskustelufoorumi.database.CategoryDao;
 import tikape.keskustelufoorumi.database.MessageDao;
+import tikape.keskustelufoorumi.database.ThreadDao;
 import tikape.keskustelufoorumi.domain.Message;
 
 public class WebUI implements UI {
     private Database database;
     private UserDao userDao;
     private CategoryDao categoryDao;
+    private ThreadDao threadDao;
     private MessageDao messageDao;
     
     private AccessTokenDao accessTokenDao;
@@ -52,6 +52,7 @@ public class WebUI implements UI {
         this.userDao = new UserDao(this.database);
         this.accessTokenDao = new AccessTokenDao(this.database);
         this.categoryDao = new CategoryDao(this.database);
+        this.threadDao = new ThreadDao(this.database);
         this.messageDao = new MessageDao(this.database);
         
         int port = 4567;
@@ -122,6 +123,12 @@ public class WebUI implements UI {
         }
         
         Session s = req.session();
+        
+        /*
+        
+        Siirretään mahdollisten ilmoitusten arvot sessiomuuttujista näkymän mappiin
+        
+        */
         
         map.put("success", s.attribute("success"));
         map.put("error", s.attribute("error"));
@@ -248,7 +255,6 @@ public class WebUI implements UI {
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
-        
         get("/", simpleView("home", "index", (Context ctx) -> {
             HashMap map = ctx.getMap();
                         
@@ -286,14 +292,17 @@ public class WebUI implements UI {
             req.session().attribute("register-name", null);
         }), engine);
                 
-        get("/alue/:id", simpleView("home", "index", (Context ctx) -> {
+        get("/alue/:id", simpleView("", "alue", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             
-            //List<Message> messages = this.messageDao.findAll();
+            Integer id = extractId(req.params(":id"));
             
+            map.put("title", "Alue: " + id);
             
-            //return extractId(req.params(":id"));
+            List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllInCategory(id);
+            
+            map.put("threads", threads);
         }), engine);
         
         get("/ulos", (req, res) -> {

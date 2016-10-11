@@ -7,3 +7,11 @@ input {
 html {
   font-size: 14px;
 }
+
+td.a {
+    width: 50%;
+}
+
+td.b {
+    width: 10%;
+}

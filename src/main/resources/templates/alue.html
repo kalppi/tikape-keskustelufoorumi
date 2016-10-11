@@ -4,15 +4,15 @@
 
 <table class="table">
     <tr>
-        <th>Alue: </th><th>Viestejä</th><th>Viimeisin viesti</th>
+        <th class="a">Alue: {{category.name}}</th><th class="b">Viestejä</th><th class="c">Viimeisin viesti</th>
     </tr>
-    {{#categories}}
+    {{#threads}}
     <tr>
-        <td><a href="/alue/{{id}}-{{url-encode name}}">{{name}}</a></td>
-        <td>{{postCount}}</td>
-        <td>{{dt latestMessage.sent}}</td>
+        <td class="a"><a href="/ketju/{{id}}-{{url-encode title}}">{{title}}</a></td>
+        <td class="b">{{messageCount}}</td>
+        <td class="c">{{dt latestMessage.sent}}</td>
     </tr>
-    {{/categories}}
+    {{/threads}}
 </table>
 
 {{>bottom}}

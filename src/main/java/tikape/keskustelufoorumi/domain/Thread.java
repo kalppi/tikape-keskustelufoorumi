@@ -10,12 +10,14 @@ public class Thread {
     private Integer id;
     private Integer categoryId;
     private String title;
+    private Integer messageCount;
     private Message latestMessage;
 
-    public Thread(Integer id, Integer categoryId, String title, Message latestMessage) {
+    public Thread(Integer id, Integer categoryId, String title, Integer messageCount, Message latestMessage) {
         this.id = id;
         this.categoryId = categoryId;
         this.title = title;
+        this.messageCount = messageCount;
         this.latestMessage = latestMessage;
     }
 
@@ -33,6 +35,10 @@ public class Thread {
 
     public Message getLatestMessage() {
         return latestMessage;
+    }
+    
+    public Integer getMessageCount() {
+        return this.messageCount;
     }
 
     public void setId(Integer id) {
