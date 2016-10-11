@@ -36,25 +36,24 @@ public class ThreadDao implements IDao<Thread, Integer>  {
                 + "GROUP BY t.id, m.id "
                 + "ORDER BY t.id ASC, m.sent DESC";
         
-        try {
-            Connection c = this.database.getConnection();
-            
-            PreparedStatement s = c.prepareCall(sql);
-            s.setObject(1, key);
-            
-            ResultSet rs = s.executeQuery();
-            
-            if(!rs.next()) {
-                return null;
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = c.prepareCall(sql)) {
+                s.setObject(1, key);
+
+                try(ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        return null;
+                    }
+
+                    Integer id = rs.getInt("t_id");
+                    Integer categoryId = rs.getInt("t_category_id");
+                    String title = rs.getString("t_title");
+
+                    Thread thread = new Thread(id, categoryId, title, null, null);
+
+                    return thread;
+                }
             }
-            
-            Integer id = rs.getInt("t_id");
-            Integer categoryId = rs.getInt("t_category_id");
-            String title = rs.getString("t_title");
-            
-            Thread thread = new Thread(id, categoryId, title, null, null);
-            
-            return thread;
         } catch(SQLException e) {
             e.printStackTrace();
             return null;
@@ -106,17 +105,17 @@ public class ThreadDao implements IDao<Thread, Integer>  {
     }
 
     @Override
-    public List<Thread> findAllIn(Collection<Integer> keys) throws SQLException {
+    public List<Thread> findAllIn(Collection<Integer> keys) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void delete(Integer key) throws SQLException {
+    public void delete(Integer key) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
-    public List<Thread> findAll() throws SQLException {
+    public List<Thread> findAll() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -137,32 +136,31 @@ public class ThreadDao implements IDao<Thread, Integer>  {
                 + "ORDER BY t.id ASC, m.sent DESC"
                 + ") q ORDER BY m_sent DESC";
         
-        try {
-            Connection c = this.database.getConnection();
-            PreparedStatement s = c.prepareStatement(sql);
-            
-            s.setObject(1, cat);
-            
-            ResultSet rs = s.executeQuery();
-            
-            while(rs.next()) {
-                Integer uId = rs.getInt("u_id");
-                String uName = rs.getString("u_name");
-                Boolean uAdmin = rs.getBoolean("u_admin");
-                
-                Integer mId = rs.getInt("m_id");
-                Integer tId = rs.getInt("t_id");
-                LocalDateTime sent = rs.getTimestamp("m_sent").toLocalDateTime();
-                
-                Integer tCategoryId = rs.getInt("t_category_id");
-                String title = rs.getString("t_title");
-                Integer messageCount = rs.getInt("t_message_count");
-                
-                User user = new User(uId, uName, null, uAdmin);
-                Message message = new Message(mId, user, tId, sent, null);
-                Thread thread = new Thread(tId, tCategoryId, title, messageCount, message);
-                
-                threads.add(thread);
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = c.prepareStatement(sql)) {
+                s.setObject(1, cat);
+
+                try (ResultSet rs = s.executeQuery()) {
+                    while(rs.next()) {
+                        Integer uId = rs.getInt("u_id");
+                        String uName = rs.getString("u_name");
+                        Boolean uAdmin = rs.getBoolean("u_admin");
+
+                        Integer mId = rs.getInt("m_id");
+                        Integer tId = rs.getInt("t_id");
+                        LocalDateTime sent = rs.getTimestamp("m_sent").toLocalDateTime();
+
+                        Integer tCategoryId = rs.getInt("t_category_id");
+                        String title = rs.getString("t_title");
+                        Integer messageCount = rs.getInt("t_message_count");
+
+                        User user = new User(uId, uName, null, uAdmin);
+                        Message message = new Message(mId, user, tId, sent, null);
+                        Thread thread = new Thread(tId, tCategoryId, title, messageCount, message);
+
+                        threads.add(thread);
+                    }
+                }
             }
         } catch(SQLException e) {
             e.printStackTrace();

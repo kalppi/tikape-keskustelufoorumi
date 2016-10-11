@@ -28,55 +28,61 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
     
     @Override
     public AccessToken findOneBy(String key, Object value) {
-        try {
-            Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOneBy(c, "Access_tokens", key, value, Arrays.asList("*"));
-            
-            ResultSet rs = s.executeQuery();
-            if(!rs.next()) {
-                return null;
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = StatementBuilder.findOneBy(c, "Access_tokens", key, value, Arrays.asList("*"))) {
+                try (ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        return null;
+                    }
+
+                    Integer id = rs.getInt("id");
+                    String name = rs.getString("token");
+                    Integer userId = rs.getInt("user_id");
+
+                    AccessToken t = new AccessToken(id, name, userId);
+
+                    return t;
+                }
             }
-
-            Integer id = rs.getInt("id");
-            String name = rs.getString("token");
-            Integer userId = rs.getInt("user_id");
-
-            AccessToken t = new AccessToken(id, name, userId);
-
-            s.close();
-            c.close();
-
-            return t;
         } catch(SQLException e) {
             return null;
         }
     }
     
     @Override
-    public List<AccessToken> findAll() throws SQLException {
+    public List<AccessToken> findAll() {
         return null;
     }
     
     @Override
-    public List<AccessToken> findAllIn(Collection<Integer> keys) throws SQLException {
+    public List<AccessToken> findAllIn(Collection<Integer> keys) {
         return null;
     }
     
     @Override
-    public void delete(Integer key) throws SQLException {
-        Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.delete(c, "Access_tokens", key);
-        s.execute();
+    public void delete(Integer key) {
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = StatementBuilder.delete(c, "Access_tokens", key)) {
+                s.execute();
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
     }
     
     public void insert(String token, Integer userId) throws SQLException {
-        Connection c = this.database.getConnection();
-        PreparedStatement s = StatementBuilder.insert(c, "Access_tokens", Arrays.asList("token", "user_id"));
-        
-        s.setObject(1, token);
-        s.setObject(2, userId);
-        
-        s.execute();
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = StatementBuilder.insert(c, "Access_tokens", Arrays.asList("token", "user_id"))) {
+                s.setObject(1, token);
+                s.setObject(2, userId);
+
+                s.execute();
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+            
+            throw e;
+        }
     }
 
     @Override

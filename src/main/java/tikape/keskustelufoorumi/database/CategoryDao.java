@@ -6,11 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import tikape.keskustelufoorumi.Helper;
 import tikape.keskustelufoorumi.domain.Category;
 import tikape.keskustelufoorumi.domain.Message;
@@ -40,25 +37,24 @@ public class CategoryDao implements IDao<Category, Integer> {
                 + "GROUP BY c.id, m.id, u.id, t.id "
                 + "ORDER BY c.id ASC, m.sent DESC";
         
-        try {
-            Connection c = this.database.getConnection();
-            PreparedStatement s = c.prepareStatement(sql);
-            
-            s.setObject(1, key);
-            
-            ResultSet rs = s.executeQuery();
-            
-            if(!rs.next()) {
-                return null;
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = c.prepareStatement(sql)) {
+                s.setObject(1, key);
+
+                try (ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        return null;
+                    }
+
+                    Integer id = rs.getInt("c_id");
+                    String name = rs.getString("c_name");
+                    Integer messageCount = rs.getInt("c_message_count");
+
+                    Category cat = new Category(id, name, messageCount, null);
+
+                    return cat;
+                }
             }
-            
-            Integer id = rs.getInt("c_id");
-            String name = rs.getString("c_name");
-            Integer messageCount = rs.getInt("c_message_count");
-            
-            Category cat = new Category(id, name, messageCount, null);
-            
-            return cat;
         } catch(SQLException e) {
             e.printStackTrace();
         }
@@ -102,41 +98,40 @@ public class CategoryDao implements IDao<Category, Integer> {
                 + "ORDER BY c.id ASC";
         }
                 
-        try {
-            Connection c = this.database.getConnection();
-            PreparedStatement s = c.prepareStatement(sql);
-            
-            ResultSet rs = s.executeQuery();
-            
-            while(rs.next()) {
-                Integer cId = rs.getInt("c_id");
-                String cName = rs.getString("c_name");
-                Integer cMessageCount = rs.getInt("c_message_count");
-                                
-                Integer uId = rs.getInt("u_id");
-                String uName = rs.getString("u_name");
-                Boolean uAdmin = rs.getBoolean("u_admin");
-                
-                Integer tId = rs.getInt("t_id");
-                
-                Integer mId = rs.getInt("m_id");
-                
-                LocalDateTime sent = null;
-                
-                if(tId != 0) {                    
-                    if(this.database.isPostgres()) {
-                        sent = rs.getTimestamp("m_sent").toLocalDateTime();
-                    } else {
-                        String sqlDate = rs.getString("m_sent");
-                        sent = Helper.parseSqlDate(sqlDate);
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = c.prepareStatement(sql)) {
+                try (ResultSet rs = s.executeQuery()) {
+                    while(rs.next()) {
+                        Integer cId = rs.getInt("c_id");
+                        String cName = rs.getString("c_name");
+                        Integer cMessageCount = rs.getInt("c_message_count");
+
+                        Integer uId = rs.getInt("u_id");
+                        String uName = rs.getString("u_name");
+                        Boolean uAdmin = rs.getBoolean("u_admin");
+
+                        Integer tId = rs.getInt("t_id");
+
+                        Integer mId = rs.getInt("m_id");
+
+                        LocalDateTime sent = null;
+
+                        if(tId != 0) {                    
+                            if(this.database.isPostgres()) {
+                                sent = rs.getTimestamp("m_sent").toLocalDateTime();
+                            } else {
+                                String sqlDate = rs.getString("m_sent");
+                                sent = Helper.parseSqlDate(sqlDate);
+                            }
+                        }
+
+                        User user = new User(uId, uName, null, uAdmin);
+                        Message message = new Message(mId, user, tId, sent, null);
+                        Category category = new Category(cId, cName, cMessageCount, message);
+
+                        categories.add(category);
                     }
                 }
-                
-                User user = new User(uId, uName, null, uAdmin);
-                Message message = new Message(mId, user, tId, sent, null);
-                Category category = new Category(cId, cName, cMessageCount, message);
-                
-                categories.add(category);
             }
         } catch(SQLException e) {
             e.printStackTrace();
@@ -146,12 +141,12 @@ public class CategoryDao implements IDao<Category, Integer> {
     }
     
     @Override
-    public List<Category> findAllIn(Collection<Integer> keys) throws SQLException {
+    public List<Category> findAllIn(Collection<Integer> keys) {
         return null;
     }
     
     @Override
-    public void delete(Integer key) throws SQLException {
+    public void delete(Integer key) {
         // ei toteutettu
     }
 

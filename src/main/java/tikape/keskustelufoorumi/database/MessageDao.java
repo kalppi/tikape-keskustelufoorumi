@@ -26,127 +26,118 @@ public class MessageDao implements IDao<Message, Integer> {
     
     @Override
     public Message findOne(Integer key) {
-        try {
-            Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOne(c, "Messages", key, Arrays.asList("*"));
-            ResultSet rs = s.executeQuery();
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = StatementBuilder.findOne(c, "Messages", key, Arrays.asList("*"))) {
+                try (ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        return null;
+                    }
 
-            if(!rs.next()) {
-                return null;
+                    Integer id = rs.getInt("id");
+                    Integer userId = rs.getInt("user_id");
+                    Integer threadId = rs.getInt("thread_id");
+                    String text = rs.getString("text");
+                    String sqlDate = rs.getString("sent");
+                    LocalDateTime sent = Helper.parseSqlDate(sqlDate);
+
+                    User user = this.userDao.findOne(userId);
+
+                    return new Message(id, user, threadId, sent, text);
+                }
             }
-
-            Integer id = rs.getInt("id");
-            Integer userId = rs.getInt("user_id");
-            Integer threadId = rs.getInt("thread_id");
-            String text = rs.getString("text");
-            String sqlDate = rs.getString("sent");
-            LocalDateTime sent = Helper.parseSqlDate(sqlDate);
-            
-            rs.close();
-            s.close();
-            c.close();
-
-            User user = this.userDao.findOne(userId);
-
-            return new Message(id, user, threadId, sent, text);
         } catch(SQLException e) {
+            e.printStackTrace();
+            
             return null;
         }
     }
     
     @Override
     public Message findOneBy(String key, Object value) {
-        try {
-            Connection c = this.database.getConnection();
-            PreparedStatement s = StatementBuilder.findOneBy(c, "Messages", key, value, Arrays.asList("*"));
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = StatementBuilder.findOneBy(c, "Messages", key, value, Arrays.asList("*"))) {
+                try (ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        return null;
+                    }
 
-            ResultSet rs = s.executeQuery();
-            if(!rs.next()) {
-                return null;
+                    Integer id = rs.getInt("id");
+                    Integer userId = rs.getInt("user_id");
+                    Integer threadId = rs.getInt("thread_id");
+                    String text = rs.getString("text");
+                    String sqlDate = rs.getString("sent");
+                    LocalDateTime sent = Helper.parseSqlDate(sqlDate);
+
+                    User user = this.userDao.findOne(userId);
+
+                    return new Message(id, user, threadId, sent, text);
+                }
             }
-
-            Integer id = rs.getInt("id");
-            Integer userId = rs.getInt("user_id");
-            Integer threadId = rs.getInt("thread_id");
-            String text = rs.getString("text");
-            String sqlDate = rs.getString("sent");
-            LocalDateTime sent = Helper.parseSqlDate(sqlDate);
-            
-            rs.close();
-            s.close();
-            c.close();
-
-            User user = this.userDao.findOne(userId);
-            
-            return new Message(id, user, threadId, sent, text);
-            
         } catch(SQLException e) {
             return null;
         }
     }
     
     @Override
-    public List<Message> findAll() throws SQLException {
+    public List<Message> findAll() {
         return null;
     }
     
     @Override
-    public List<Message> findAllIn(Collection<Integer> keys) throws SQLException {
+    public List<Message> findAllIn(Collection<Integer> keys) {
         if(keys.isEmpty()) {
             return new ArrayList();
         }
         
         List<Message> viestit = new ArrayList();
         
-        Connection c = this.database.getConnection();
-        
-        List<String> fields = new ArrayList(Arrays.asList("id", "user_id", "thread_id", "text"));
-        
-        if(this.database.isPostgres()) {
-            fields.add("sent AT TIME ZONE 'Europe/Helsinki'");
-        } else {
-            fields.add("DATETIME(sent, 'localtime') AS sent");
-        }
-        
-        PreparedStatement s = StatementBuilder.findAllIn(c, "Messages", keys, fields);
-        
-        ResultSet rs = s.executeQuery();
-        
-        if(rs == null) {
-            return new ArrayList();
-        }
-        
-        Map<Integer, List<Message>> userMap = new HashMap();
-        
-        while(rs.next()) {
-            Integer id = rs.getInt("id");
-            Integer userId = rs.getInt("user_id");
-            Integer threadId = rs.getInt("thread_id");
-            String text = rs.getString("text");
-            String sqlDate = rs.getString("sent");
-            LocalDateTime sent = Helper.parseSqlDate(sqlDate);
-                        
-            Message message = new Message(id, null, threadId, sent, text);
-            viestit.add(message);
-            
-            if(!userMap.containsKey(userId)) {
-                userMap.put(userId, new ArrayList());
-            }
-            
-            userMap.get(userId).add(message);
-        }
+        try (Connection c = this.database.getConnection()) {
+            List<String> fields = new ArrayList(Arrays.asList("id", "user_id", "thread_id", "text"));
 
-        List<User> users = this.userDao.findAllIn(userMap.keySet());
-        
-        for(User o : users) {
-            for(Message v : userMap.get(o.getId())) {
-                v.setUser(o);
+            if(this.database.isPostgres()) {
+                fields.add("sent AT TIME ZONE 'Europe/Helsinki'");
+            } else {
+                fields.add("DATETIME(sent, 'localtime') AS sent");
             }
+
+            try (PreparedStatement s = StatementBuilder.findAllIn(c, "Messages", keys, fields)) {
+                try (ResultSet rs = s.executeQuery()) {
+                    if(rs == null) {
+                        return new ArrayList();
+                    }
+
+                    Map<Integer, List<Message>> userMap = new HashMap();
+
+                    while(rs.next()) {
+                        Integer id = rs.getInt("id");
+                        Integer userId = rs.getInt("user_id");
+                        Integer threadId = rs.getInt("thread_id");
+                        String text = rs.getString("text");
+                        String sqlDate = rs.getString("sent");
+                        LocalDateTime sent = Helper.parseSqlDate(sqlDate);
+
+                        Message message = new Message(id, null, threadId, sent, text);
+                        viestit.add(message);
+
+                        if(!userMap.containsKey(userId)) {
+                            userMap.put(userId, new ArrayList());
+                        }
+
+                        userMap.get(userId).add(message);
+                    }
+
+                    List<User> users = this.userDao.findAllIn(userMap.keySet());
+
+                    for(User o : users) {
+                        for(Message v : userMap.get(o.getId())) {
+                            v.setUser(o);
+                        }
+                    }
+                }
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
         }
-        
-        rs.close();
-        s.close();
-        c.close();
         
         return viestit;
     }
@@ -161,28 +152,27 @@ public class MessageDao implements IDao<Message, Integer> {
                 + "WHERE m.thread_id = ? "
                 + "ORDER BY m.sent ASC";
         
-        try {
-            Connection c = this.database.getConnection();
-            
-            PreparedStatement s = c.prepareStatement(sql);
-            s.setObject(1, id);
-            
-            ResultSet rs = s.executeQuery();
-            
-            while(rs.next()) {
-                Integer mId = rs.getInt("m_id");
-                Integer mThreadId = rs.getInt("m_thread_id");
-                LocalDateTime mSent = rs.getTimestamp("m_sent").toLocalDateTime();
-                String mText = rs.getString("m_text");
-                
-                Integer uId = rs.getInt("u_id");
-                String uName = rs.getString("u_name");
-                Boolean uAdmin = rs.getBoolean("u_admin");
-                
-                User user = new User(uId, uName, null, uAdmin);
-                Message message = new Message(mId, user, mThreadId, mSent, mText);
-                
-                messages.add(message);
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = c.prepareStatement(sql)) {
+                s.setObject(1, id);
+
+                try (ResultSet rs = s.executeQuery()) {
+                    while(rs.next()) {
+                        Integer mId = rs.getInt("m_id");
+                        Integer mThreadId = rs.getInt("m_thread_id");
+                        LocalDateTime mSent = rs.getTimestamp("m_sent").toLocalDateTime();
+                        String mText = rs.getString("m_text");
+
+                        Integer uId = rs.getInt("u_id");
+                        String uName = rs.getString("u_name");
+                        Boolean uAdmin = rs.getBoolean("u_admin");
+
+                        User user = new User(uId, uName, null, uAdmin);
+                        Message message = new Message(mId, user, mThreadId, mSent, mText);
+
+                        messages.add(message);
+                    }
+                }
             }
         } catch(SQLException e) {
             e.printStackTrace();
@@ -192,7 +182,7 @@ public class MessageDao implements IDao<Message, Integer> {
     }
     
     @Override
-    public void delete(Integer key) throws SQLException {
+    public void delete(Integer key) {
         // ei toteutettu
     }
 
