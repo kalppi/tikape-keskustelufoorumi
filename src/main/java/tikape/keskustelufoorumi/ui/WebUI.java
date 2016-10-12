@@ -102,9 +102,18 @@ public class WebUI implements UI {
     private Context getContext(Request req, Response res) {
         Context ctx = new Context();
         HashMap map = new HashMap<>();
+        Session ses = req.session();
         
+        String path = req.pathInfo();
+        
+        if(!path.equals(ses.attribute("currentPage"))) {
+            ses.attribute("lastPage", ses.attribute("currentPage"));
+            ses.attribute("currentPage", path);
+        }
+        
+        ctx.setLastPage(ses.attribute("lastPage"));        
         ctx.setMap(map);
-        
+                
         /*
         
         mikäli löytyy käytössä oleva access_token keksi, kirjataan käyttäjä sisään
@@ -123,23 +132,21 @@ public class WebUI implements UI {
             }
         }
         
-        Session s = req.session();
-        
         /*
         
         Siirretään mahdollisten ilmoitusten arvot sessiomuuttujista näkymän mappiin
         
         */
         
-        map.put("success", s.attribute("success"));
-        map.put("error", s.attribute("error"));
-        map.put("info", s.attribute("info"));
-        map.put("warning", s.attribute("warning"));
+        map.put("success", ses.attribute("success"));
+        map.put("error", ses.attribute("error"));
+        map.put("info", ses.attribute("info"));
+        map.put("warning", ses.attribute("warning"));
         
-        s.attribute("success", null);
-        s.attribute("error", null);
-        s.attribute("info", null);
-        s.attribute("warning", null);
+        ses.attribute("success", null);
+        ses.attribute("error", null);
+        ses.attribute("info", null);
+        ses.attribute("warning", null);
         
         Menu userMenu = this.menu.buildWithContext(ctx);
         
@@ -280,7 +287,9 @@ public class WebUI implements UI {
         get("/kirjaudu", simpleView("login", "kirjaudu", (Context ctx) -> {     
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
+            Session ses = req.session();
             
+            map.put("lastPage", ctx.getLastPage());
             map.put("login-name", req.session().attribute("login-name"));
             req.session().attribute("login-name", null);
         }), engine);
@@ -289,6 +298,7 @@ public class WebUI implements UI {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             
+            map.put("lastPage", ctx.getLastPage());
             map.put("register-name", req.session().attribute("register-name"));
             req.session().attribute("register-name", null);
         }), engine);
@@ -431,10 +441,11 @@ public class WebUI implements UI {
         
         get("/ulos", (req, res) -> {
             Context ctx = getContext(req, res);
+            Session ses = req.session();
             
             if(ctx.getAccessToken() != null) {
                 logout(res, ctx);
-                res.redirect("/");
+                res.redirect(ctx.getLastPage());
             }
             
             return null; 
@@ -449,6 +460,7 @@ public class WebUI implements UI {
             if(req.queryParams("login-ok") != null) {
                 String name = req.queryParams("login-name").trim();
                 String pw = req.queryParams("login-pw");
+                String url = req.queryParams("url");
                 
                 User o = (User)this.userDao.findOneBy("name", name);
                 if(o == null || !Auth.passwordMatches(o, pw)) {
@@ -458,11 +470,11 @@ public class WebUI implements UI {
                 } else {
                     if(login(res, o)) {
                         req.session().attribute("success", "Kirjautuminen onnistui");
+                        res.redirect(url);
                     } else {
                         req.session().attribute("error", "Kirjautuminen epäonnistui: tuntematon syy");
+                        res.redirect("/kirjaudu");
                     }
-                    
-                    res.redirect("/");
                 }
             }
         }));
@@ -500,6 +512,7 @@ public class WebUI implements UI {
                 String name = req.queryParams("register-name").trim();
                 String pw = req.queryParams("register-pw");
                 String pw2 = req.queryParams("register-pw2");
+                String url = req.queryParams("url");
                 
                 req.session().attribute("register-name", name);
                 
@@ -540,7 +553,7 @@ public class WebUI implements UI {
                     login(res, o);
 
                     req.session().attribute("success", "Rekisteröityminen onnistui");
-                    res.redirect("/");
+                    res.redirect(url);
                 }
             }
         }));

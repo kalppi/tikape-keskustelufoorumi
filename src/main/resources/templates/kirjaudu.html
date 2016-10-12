@@ -3,6 +3,7 @@
 <h2>Kirjaudu</h2>
 
 <form action="/kirjaudu" method="post">
+    <input type="hidden" name="url" value="{{lastPage}}" />
     <div class="form-group"
          ><label for="login-name">Nimi</label>
         <input class="form-control" type="text" name="login-name" id="login-name" placeholder="Nimi" value="{{login-name}}" />

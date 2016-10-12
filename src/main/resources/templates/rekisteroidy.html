@@ -3,6 +3,7 @@
 <h2>Rekisteröidy</h2>
 
 <form action="/rekisteroidy" method="post">
+    <input type="hidden" name="url" value="{{lastPage}}" />
     <div class="form-group"
          ><label for="register-name">Nimi</label>
         <input class="form-control" type="text" name="register-name" id="register-name" placeholder="Nimi (a-zA-Z0-9)" value="{{register-name}}" />

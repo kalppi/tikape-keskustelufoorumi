@@ -18,11 +18,12 @@ public class Context {
     private HashMap map;
     private Request req;
     private Response res;
+    private String lastPage;
     
     public Context() {
         
     }
-
+    
     public User getLoggedInUser() {
         return loggedInUser;
     }
@@ -46,6 +47,10 @@ public class Context {
     public Response getResponse() {
         return this.res;
     }
+    
+    public String getLastPage() {
+        return this.lastPage;
+    }
 
     public void setLoggedInUser(User loggedInUser) {
         this.loggedInUser = loggedInUser;
@@ -61,6 +66,10 @@ public class Context {
 
     public void setMap(HashMap map) {
         this.map = map;
+    }
+    
+    public void setLastPage(String lastPage) {
+        this.lastPage = lastPage;
     }
     
     public void setReqRes(Request req, Response res) {
