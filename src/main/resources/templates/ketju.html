@@ -17,6 +17,8 @@
 </table>
 {{/messages}}
 
-{{>uusi-viesti}}
+{{#if user}}
+    {{>uusi-viesti}}
+{{/if}}
 
 {{>bottom}}
