@@ -313,9 +313,8 @@ public class WebUI implements UI {
             map.put("category", cat);
             map.put("threads", threads);
         }), engine);
-        
-        //FIXME: restricted
-        post("/alue/:id", simple((Context ctx) -> {
+                
+        post("/alue/:id", restricted((Context ctx) -> {
             Request req = ctx.getRequest();
             Response res = ctx.getResponse();
             
@@ -326,7 +325,7 @@ public class WebUI implements UI {
                 
                 Integer categoryId;
                 try {
-                    categoryId = Integer.parseInt(req.queryParams("thread-category-id"));
+                    categoryId = Integer.parseInt(req.params(":id"));
                 } catch(Exception e) {
                     return;
                 }
@@ -352,7 +351,7 @@ public class WebUI implements UI {
                 
                 if(error == null) {
                     try {
-                        this.threadDao.insert(categoryId, title, 1, text);
+                        this.threadDao.insert(categoryId, title, ctx.getLoggedInUser().getId(), text);
                         
                         ses.attribute("thread-title", null);
                         ses.attribute("thread-text", null);
@@ -367,15 +366,62 @@ public class WebUI implements UI {
             }
         }));
         
+        post("/ketju/:id", restricted((Context ctx) -> {
+            Request req = ctx.getRequest();
+            Response res = ctx.getResponse();
+            
+            if(req.queryParams("message-ok") != null) {
+                String text = req.queryParams("message-text").trim();
+                Session ses = req.session();
+                
+                Integer threadId;
+                try {
+                    threadId = Integer.parseInt(req.params(":id"));
+                } catch(Exception e) {
+                    return;
+                }
+                
+                Validator messageValidator = new Validator();
+                messageValidator.addRule(new MinLengthRule(3, "viestin pitää olla vähintään 3 merkkiä"));
+                messageValidator.addRule(new MaxLengthRule(2000, "viesti saa olla enintään 2000 merkkiä"));
+                
+                String error = null;
+                                
+                if(!messageValidator.validate(text)) {
+                    error = messageValidator.getReason();
+                }
+                
+                ses.attribute("message-text", text);
+                
+                if(error == null) {
+                    try {
+                        this.messageDao.insert(threadId, ctx.getLoggedInUser().getId(), text);
+                        
+                        ses.attribute("message-text", null);
+                    } catch(Exception e) {
+                        ses.attribute("error", "Viestin lähettäminen epäonnistui: tuntematon virhe");
+                    }
+                } else {
+                    ses.attribute("error", "Viestin lähettäminen epäonnistui: " + error);
+                }
+                
+                res.redirect(req.url());
+            }
+        }));
+        
         get("/ketju/:id", simpleView("home", "ketju", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
+            Session ses = req.session();
             
             Integer id = extractId(req.params(":id"));
             
             tikape.keskustelufoorumi.domain.Thread thread = this.threadDao.findOne(id);
             Category category = this.categoryDao.findOne(thread.getCategory_id());
             List<Message> messages = this.messageDao.findAllInThread(id);
+            
+            map.put("message-text", ses.attribute("message-text"));
+            ses.attribute("message-text", null);
             
             map.put("title", "Ketju: " + thread.getTitle());
             map.put("category", category);

@@ -185,4 +185,16 @@ public class MessageDao implements IDao<Message, Integer> {
     public List<Message> findAllBy(String key, Object value) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    public void insert(Integer threadId, Integer userId, String text) throws Exception {
+        try (Connection c = this.database.getConnection()) {
+            try(PreparedStatement s = c.prepareStatement("INSERT INTO Messages (user_id, thread_id, text) VALUES (?, ?, ?)")) {
+                s.setObject(1, userId);
+                s.setObject(2, threadId);
+                s.setObject(3, text);
+                
+                s.executeUpdate();
+            }
+        }
+    }
 }
