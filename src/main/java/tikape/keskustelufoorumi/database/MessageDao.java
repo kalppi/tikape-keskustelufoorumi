@@ -137,19 +137,20 @@ public class MessageDao implements IDao<Message, Integer> {
         return viestit;
     }
     
-    public List<Message> findAllInThread(Integer id) {
+    @Override
+    public List<Message> findAllBy(String key, Object value) {
         List<Message> messages = new ArrayList();
         String sql = "SELECT "
                 + "m.id AS m_id, m.text AS m_text, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, m.thread_id AS m_thread_id, "
                 + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin "
                 + "FROM Messages m "
                 + "LEFT JOIN Users u ON u.id = m.user_id "
-                + "WHERE m.thread_id = ? "
+                + "WHERE m." + key + " = ? "
                 + "ORDER BY m.sent ASC";
         
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = c.prepareStatement(sql)) {
-                s.setObject(1, id);
+                s.setObject(1, value);
 
                 try (ResultSet rs = s.executeQuery()) {
                     while(rs.next()) {
@@ -179,11 +180,6 @@ public class MessageDao implements IDao<Message, Integer> {
     @Override
     public void delete(Integer key) {
         // ei toteutettu
-    }
-
-    @Override
-    public List<Message> findAllBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     public void insert(Integer threadId, Integer userId, String text) throws Exception {

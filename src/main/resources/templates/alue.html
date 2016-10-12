@@ -2,13 +2,21 @@
 
 <h2><a href="/">Keskustelu</a> / {{category.name}}</h2>
 
+{{#gt pages 1}}
+    <ol class="pages">
+    {{#times pages}}
+    <li class="{{#eqi this currentPage}}selected{{/eqi}}"><a href="{{url '/alue/' category.id '-' category.name '/sivu/' this}}">{{this}}</a></li>
+    {{/times}}
+    </ol>
+{{/gt}}
+
 <table class="table">
     <tr>
         <th class="a">Otsikko</th><th class="b">Viestejä</th><th class="c">Viimeisin viesti</th>
     </tr>
     {{#threads}}
     <tr>
-        <td class="a"><a href="/ketju/{{id}}-{{url-encode title}}">{{title}}</a></td>
+        <td class="a"><a href="{{url '/ketju/' id '-' title}}">{{title}}</a></td>
         <td class="b">{{messageCount}}</td>
         <td class="c">{{dt latestMessage.sent}}</td>
     </tr>

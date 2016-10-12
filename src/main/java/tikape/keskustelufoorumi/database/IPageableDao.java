@@ -8,4 +8,5 @@ import java.util.List;
  */
 public interface IPageableDao<T> {
     List<T> findAll(Integer start, Integer limit);
+    List<T> findAllBy(String key, Object value, Integer start, Integer limit);
 }

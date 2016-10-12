@@ -34,3 +34,26 @@ textarea {
     max-width: 50%;
     min-height: 200px;
 }
+
+.pages {
+    list-style-type: none;
+    padding: 0;
+}
+
+.pages li {
+    display: inline-block;
+    border: 1px solid #337ab7;
+}
+
+.pages li.selected {
+    background: #337ab7;
+}
+
+.pages li.selected a {
+    color: white;
+}
+
+.pages li a {
+    padding: 7px;
+}
+

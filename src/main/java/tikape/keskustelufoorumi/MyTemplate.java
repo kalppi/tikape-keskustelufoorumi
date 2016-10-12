@@ -31,12 +31,44 @@ public class MyTemplate extends TemplateEngine {
         
         this.engine = new Handlebars(loader);
         
+        
+        
         this.engine.registerHelper("url-encode", new Helper<String>() {
             public CharSequence apply(String text, Options options) {
                 try {
                     return URLEncoder.encode(text, "UTF-8").toLowerCase();
                 } catch(UnsupportedEncodingException e) {
                     return text;
+                }
+            }
+        });
+        
+        this.engine.registerHelper("url", new Helper<String>() {
+            public CharSequence apply(String text, Options options) {
+                try {
+                    StringBuilder s = new StringBuilder();
+                    s.append(text);
+                    for(Integer i = 0; i < options.params.length; i++) {
+                        s.append(options.param(i).toString());
+                    }
+                    return s.toString().replaceAll(" ", "%20").toLowerCase();                
+                } catch(Exception e) {
+                    return text;
+                }
+            }
+        });
+        
+        this.engine.registerHelper("gt", new Helper<Integer>() {
+            public CharSequence apply(Integer a, Options options) {
+                try {
+                    Integer b = options.param(0);
+                    if(a > b) {
+                        return options.fn();
+                    } else {
+                        return options.inverse();
+                    }
+                } catch(Exception e) {
+                    return "";
                 }
             }
         });
@@ -51,6 +83,67 @@ public class MyTemplate extends TemplateEngine {
                         return options.inverse();
                     }
                 } catch(Exception e) {
+                    return "";
+                }
+            }
+        });
+        
+        this.engine.registerHelper("eqi", new Helper<Integer>() {
+           public CharSequence apply(Integer a, Options options) {
+                try {
+                    Integer b = options.param(0);
+                    if(a == b) {
+                        return options.fn();
+                    } else {
+                        return options.inverse();
+                    }
+                } catch(Exception e) {
+                    return "";
+                }
+            } 
+        });
+        
+        this.engine.registerHelper("calc", new Helper<String>() {
+            public CharSequence apply(String oper, Options options) {
+                try {
+                    Integer a = options.param(0);
+                    Integer b = options.param(1);
+                    Integer c = 0;
+                    
+                    switch(oper) {
+                        case "+":
+                            c = a + b;
+                            break;
+                        case "-":
+                            c = a - b;
+                            break;
+                        case "*":
+                            c = a * b;
+                            break;
+                        case "/":
+                            c = a / b;
+                            break;
+                        case "%":
+                            c = a % b;
+                            break;
+                    }
+                    
+                    return c.toString();
+                } catch(Exception e) {
+                    return "";
+                }
+            }
+        });
+        
+        this.engine.registerHelper("times", new Helper<Integer>() {
+            public CharSequence apply(Integer times, Options options) {
+                try {
+                    StringBuilder s = new StringBuilder();
+                    for(Integer i = 1; i <= times; i++) {
+                        s.append(options.fn(i));
+                    }
+                    return s.toString();
+                } catch(IOException e) {
                     return "";
                 }
             }

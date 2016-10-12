@@ -172,4 +172,9 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
     public List<User> findAllBy(String key, Object value) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public List<User> findAllBy(String key, Object value, Integer start, Integer limit) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

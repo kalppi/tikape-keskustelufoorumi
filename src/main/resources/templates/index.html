@@ -8,7 +8,7 @@
     </tr>
     {{#categories}}
     <tr>
-        <td class="a"><a href="/alue/{{id}}-{{url-encode name}}">{{name}}</a></td>
+        <td class="a"><a href="{{url '/alue/' id '-' name}}">{{name}}</a></td>
         <td class="b">{{messageCount}}</td>
         <td class="c">{{dt latestMessage.sent}}</td>
     </tr>

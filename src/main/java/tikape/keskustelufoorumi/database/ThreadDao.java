@@ -16,7 +16,7 @@ import tikape.keskustelufoorumi.domain.User;
  *
  * @author jarnoluu
  */
-public class ThreadDao implements IDao<Thread, Integer>  {
+public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
     private Database database;
     private MessageDao messageDao;
     
@@ -63,50 +63,6 @@ public class ThreadDao implements IDao<Thread, Integer>  {
     }
 
     @Override
-    public List<Thread> findAllBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-        /*List<Thread> threads = null;
-        
-        try {
-            Connection c = this.database.getConnection();
-            PreparedStatement s = c.prepareStatement("SELECT t.id, t.title, t.category_id " +
-                    "LEFT JOIN Messages m ON t.id = m.thread_id" +
-                    "FROM Threads t " +
-                    "WHERE t." + key + " = ?" +
-                    "GROUP BY t.id ORDER BY m.sent DESC"
-            );
-            
-            s.setObject(1, value);
-
-            ResultSet rs = s.executeQuery();
-            
-            Map<Integer, Thread> threadMap = new HashMap();
-
-            while(rs.next()) {
-                Integer id = rs.getInt("id");
-                String title = rs.getString("title");
-                Integer categoryId = rs.getInt("category_id");
-                
-                Thread thread = new Thread(id, categoryId, title, null);
-                
-                threads.add(thread);
-                
-                threadMap.put(id, thread);
-            }
-            
-                       
-            
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
- 
-        
-        return threads;*/
-    }
-
-    @Override
     public List<Thread> findAllIn(Collection<Integer> keys) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -116,7 +72,27 @@ public class ThreadDao implements IDao<Thread, Integer>  {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    public List<Thread> findAllInCategory(Integer cat) {
+    public Integer countBy(String key, Object value) {
+        try (Connection c = this.database.getConnection()) {
+            try(PreparedStatement s = c.prepareStatement("SELECT COUNT(*) FROM Threads t WHERE t." + key + " = ?")) {
+                s.setObject(1, value);
+                
+                try(ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        return 0;
+                    }
+                    
+                    return rs.getInt(1);
+                }
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    
+    @Override
+    public List<Thread> findAllBy(String key, Object value, Integer start, Integer limit) {
         List<Thread> threads = new ArrayList();
         
         String sql = "SELECT * FROM ("
@@ -127,14 +103,15 @@ public class ThreadDao implements IDao<Thread, Integer>  {
                 + "FROM Threads t "
                 + "LEFT JOIN Messages m ON t.id = m.thread_id "
                 + "LEFT JOIN Users u ON u.id = m.user_id "
-                + "WHERE t.category_id = ? "
+                + "WHERE t." + key + " = ? "
                 + "GROUP BY t.id, m.id, u.id "
                 + "ORDER BY t.id ASC, m.sent DESC"
-                + ") q ORDER BY m_sent DESC";
+                + ") q ORDER BY m_sent DESC "
+                + "LIMIT " + limit + " OFFSET " + start;
         
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = c.prepareStatement(sql)) {
-                s.setObject(1, cat);
+                s.setObject(1, value);
 
                 try (ResultSet rs = s.executeQuery()) {
                     while(rs.next()) {
@@ -210,5 +187,15 @@ public class ThreadDao implements IDao<Thread, Integer>  {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @Override
+    public List<Thread> findAllBy(String key, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<Thread> findAll(Integer start, Integer limit) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

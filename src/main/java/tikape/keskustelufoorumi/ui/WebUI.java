@@ -33,6 +33,8 @@ import tikape.keskustelufoorumi.database.ThreadDao;
 import tikape.keskustelufoorumi.domain.Message;
 
 public class WebUI implements UI {
+    private final Integer THREADS_IN_PAGE = 5;
+    
     private Database database;
     
     private UserDao userDao;
@@ -302,16 +304,19 @@ public class WebUI implements UI {
             map.put("register-name", req.session().attribute("register-name"));
             req.session().attribute("register-name", null);
         }), engine);
-                
+                        
         get("/alue/:id", simpleView("home", "alue", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             Session ses = req.session();
             
             Integer id = extractId(req.params(":id"));
+            
                         
             Category cat = this.categoryDao.findOne(id);
-            List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllInCategory(id);
+            List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllBy("category_id", id, 0, this.THREADS_IN_PAGE);
+            
+            Integer pages = (int)Math.ceil(this.threadDao.countBy("category_id", cat.getId()) / (double)this.THREADS_IN_PAGE);
             
             map.put("thread-title", ses.attribute("thread-title"));
             map.put("thread-text", ses.attribute("thread-text"));
@@ -322,6 +327,40 @@ public class WebUI implements UI {
             map.put("title", "Alue: " + cat.getName());
             map.put("category", cat);
             map.put("threads", threads);
+            map.put("pages", pages);
+            map.put("currentPage", 1);
+        }), engine);
+        
+        get("/alue/:id/sivu/:page", simpleView("home", "alue", (Context ctx) -> {
+            Request req = ctx.getRequest();
+            HashMap map = ctx.getMap();
+            Session ses = req.session();
+            
+            Integer id = extractId(req.params(":id"));
+            
+            Integer page = 1;
+            try {
+                page = Integer.parseInt(req.params(":page"));
+            } catch(Exception e) {
+                
+            }
+                        
+            Category cat = this.categoryDao.findOne(id);
+            List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllBy("category_id", id, (page - 1) * this.THREADS_IN_PAGE, this.THREADS_IN_PAGE);
+            
+            Integer pages = (int)Math.ceil(this.threadDao.countBy("category_id", cat.getId()) / (double)this.THREADS_IN_PAGE);
+            
+            map.put("thread-title", ses.attribute("thread-title"));
+            map.put("thread-text", ses.attribute("thread-text"));
+            
+            ses.attribute("thread-title", null);
+            ses.attribute("thread-text", null);
+            
+            map.put("title", "Alue: " + cat.getName());
+            map.put("category", cat);
+            map.put("threads", threads);
+            map.put("pages", pages);
+            map.put("currentPage", page);
         }), engine);
                 
         post("/alue/:id", restricted((Context ctx) -> {
@@ -428,7 +467,7 @@ public class WebUI implements UI {
             
             tikape.keskustelufoorumi.domain.Thread thread = this.threadDao.findOne(id);
             Category category = this.categoryDao.findOne(thread.getCategory_id());
-            List<Message> messages = this.messageDao.findAllInThread(id);
+            List<Message> messages = this.messageDao.findAllBy("thread_id", id);
             
             map.put("message-text", ses.attribute("message-text"));
             ses.attribute("message-text", null);
