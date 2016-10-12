@@ -3,6 +3,7 @@ package tikape.keskustelufoorumi.ui;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import spark.ModelAndView;
 import spark.Request;
@@ -305,46 +306,13 @@ public class WebUI implements UI {
             req.session().attribute("register-name", null);
         }), engine);
                         
-        get("/alue/:id", simpleView("home", "alue", (Context ctx) -> {
+        BiConsumer<Context, Integer> threadsFunc = (Context ctx, Integer page) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             Session ses = req.session();
             
             Integer id = extractId(req.params(":id"));
-            
-                        
-            Category cat = this.categoryDao.findOne(id);
-            List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllBy("category_id", id, 0, this.THREADS_IN_PAGE);
-            
-            Integer pages = (int)Math.ceil(this.threadDao.countBy("category_id", cat.getId()) / (double)this.THREADS_IN_PAGE);
-            
-            map.put("thread-title", ses.attribute("thread-title"));
-            map.put("thread-text", ses.attribute("thread-text"));
-            
-            ses.attribute("thread-title", null);
-            ses.attribute("thread-text", null);
-            
-            map.put("title", "Alue: " + cat.getName());
-            map.put("category", cat);
-            map.put("threads", threads);
-            map.put("pages", pages);
-            map.put("currentPage", 1);
-        }), engine);
-        
-        get("/alue/:id/sivu/:page", simpleView("home", "alue", (Context ctx) -> {
-            Request req = ctx.getRequest();
-            HashMap map = ctx.getMap();
-            Session ses = req.session();
-            
-            Integer id = extractId(req.params(":id"));
-            
-            Integer page = 1;
-            try {
-                page = Integer.parseInt(req.params(":page"));
-            } catch(Exception e) {
-                
-            }
-                        
+                    
             Category cat = this.categoryDao.findOne(id);
             List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllBy("category_id", id, (page - 1) * this.THREADS_IN_PAGE, this.THREADS_IN_PAGE);
             
@@ -361,6 +329,23 @@ public class WebUI implements UI {
             map.put("threads", threads);
             map.put("pages", pages);
             map.put("currentPage", page);
+        };
+        
+        get("/alue/:id", simpleView("home", "alue", (Context ctx) -> {
+            threadsFunc.accept(ctx, 1);
+        }), engine);
+        
+        get("/alue/:id/sivu/:page", simpleView("home", "alue", (Context ctx) -> {
+            Request req = ctx.getRequest();
+            
+            Integer page = 1;
+            try {
+                page = Integer.parseInt(req.params(":page"));
+            } catch(Exception e) {
+                
+            }
+            
+            threadsFunc.accept(ctx, page);
         }), engine);
                 
         post("/alue/:id", restricted((Context ctx) -> {
