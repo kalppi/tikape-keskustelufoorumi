@@ -35,6 +35,7 @@ import tikape.keskustelufoorumi.domain.Message;
 
 public class WebUI implements UI {
     private final Integer THREADS_IN_PAGE = 5;
+    private final Integer MESSAGES_IN_PAGE = 5;
     
     private Database database;
     
@@ -306,7 +307,7 @@ public class WebUI implements UI {
             req.session().attribute("register-name", null);
         }), engine);
                         
-        BiConsumer<Context, Integer> threadsFunc = (Context ctx, Integer page) -> {
+        BiConsumer<Context, Integer> categoryFunc = (Context ctx, Integer page) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             Session ses = req.session();
@@ -332,7 +333,7 @@ public class WebUI implements UI {
         };
         
         get("/alue/:id", simpleView("home", "alue", (Context ctx) -> {
-            threadsFunc.accept(ctx, 1);
+            categoryFunc.accept(ctx, 1);
         }), engine);
         
         get("/alue/:id/sivu/:page", simpleView("home", "alue", (Context ctx) -> {
@@ -345,7 +346,7 @@ public class WebUI implements UI {
                 
             }
             
-            threadsFunc.accept(ctx, page);
+            categoryFunc.accept(ctx, page);
         }), engine);
                 
         post("/alue/:id", restricted((Context ctx) -> {
@@ -443,7 +444,7 @@ public class WebUI implements UI {
             }
         }));
         
-        get("/ketju/:id", simpleView("home", "ketju", (Context ctx) -> {
+        BiConsumer<Context, Integer> threadFunc = (Context ctx, Integer page) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             Session ses = req.session();
@@ -452,7 +453,9 @@ public class WebUI implements UI {
             
             tikape.keskustelufoorumi.domain.Thread thread = this.threadDao.findOne(id);
             Category category = this.categoryDao.findOne(thread.getCategory_id());
-            List<Message> messages = this.messageDao.findAllBy("thread_id", id);
+            List<Message> messages = this.messageDao.findAllBy("thread_id", id, (page - 1) * this.THREADS_IN_PAGE, this.THREADS_IN_PAGE);
+            
+            Integer pages = (int)Math.ceil(this.messageDao.countBy("thread_id", thread.getId()) / (double)this.MESSAGES_IN_PAGE);
             
             map.put("message-text", ses.attribute("message-text"));
             ses.attribute("message-text", null);
@@ -461,6 +464,25 @@ public class WebUI implements UI {
             map.put("category", category);
             map.put("thread", thread);
             map.put("messages", messages);
+            map.put("pages", pages);
+            map.put("currentPage", page);
+        };
+        
+        get("/ketju/:id", simpleView("home", "ketju", (Context ctx) -> {
+            threadFunc.accept(ctx, 1);
+        }), engine);
+        
+        get("/ketju/:id/sivu/:page", simpleView("home", "ketju", (Context ctx) -> {
+            Request req = ctx.getRequest();
+            
+            Integer page = 1;
+            try {
+                page = Integer.parseInt(req.params(":page"));
+            } catch(Exception e) {
+                
+            }
+            
+            threadFunc.accept(ctx, page);
         }), engine);
         
         get("/ulos", (req, res) -> {

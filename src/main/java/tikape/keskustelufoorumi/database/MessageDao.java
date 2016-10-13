@@ -15,7 +15,7 @@ import tikape.keskustelufoorumi.Helper;
 import tikape.keskustelufoorumi.domain.User;
 import tikape.keskustelufoorumi.domain.Message;
 
-public class MessageDao implements IDao<Message, Integer> {
+public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message> {
     private Database database;
     private UserDao userDao;
 
@@ -138,7 +138,7 @@ public class MessageDao implements IDao<Message, Integer> {
     }
     
     @Override
-    public List<Message> findAllBy(String key, Object value) {
+    public List<Message> findAllBy(String key, Object value, Integer start, Integer limit) {
         List<Message> messages = new ArrayList();
         String sql = "SELECT "
                 + "m.id AS m_id, m.text AS m_text, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, m.thread_id AS m_thread_id, "
@@ -146,7 +146,8 @@ public class MessageDao implements IDao<Message, Integer> {
                 + "FROM Messages m "
                 + "LEFT JOIN Users u ON u.id = m.user_id "
                 + "WHERE m." + key + " = ? "
-                + "ORDER BY m.sent ASC";
+                + "ORDER BY m.sent ASC "
+                + "LIMIT " + limit + " OFFSET " + start;
         
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = c.prepareStatement(sql)) {
@@ -192,5 +193,34 @@ public class MessageDao implements IDao<Message, Integer> {
                 s.executeUpdate();
             }
         }
+    }
+    
+    public Integer countBy(String key, Object value) {
+        try (Connection c = this.database.getConnection()) {
+            try(PreparedStatement s = c.prepareStatement("SELECT COUNT(*) FROM Messages t WHERE t." + key + " = ?")) {
+                s.setObject(1, value);
+                
+                try(ResultSet rs = s.executeQuery()) {
+                    if(!rs.next()) {
+                        return 0;
+                    }
+                    
+                    return rs.getInt(1);
+                }
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    @Override
+    public List<Message> findAllBy(String key, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<Message> findAll(Integer start, Integer limit) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

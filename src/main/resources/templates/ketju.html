@@ -1,7 +1,14 @@
 {{>top}}
 
-<h2><a href="/">Keskustelu</a> / <a href="/alue/{{category.id}}-{{url-encode category.name}}">{{category.name}}</a> / {{thread.title}}</h2>
+<h2><a href="/">Keskustelu</a> / <a href="{{url '/alue/' category.id '-' category.name}}">{{category.name}}</a> / {{thread.title}}</h2>
 
+{{#gt pages 1}}
+    <ol class="pages">
+    {{#times pages}}
+    <li class="{{#eqi this currentPage}}selected{{/eqi}}"><a href="{{url '/ketju/' thread.id '-' thread.title '/sivu/' this}}">{{this}}</a></li>
+    {{/times}}
+    </ol>
+{{/gt}}
 
 {{#messages}}
 <table class="message table">
