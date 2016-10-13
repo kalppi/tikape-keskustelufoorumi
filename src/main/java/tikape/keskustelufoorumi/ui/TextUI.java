@@ -4,12 +4,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import tikape.keskustelufoorumi.database.CategoryDao;
+import tikape.keskustelufoorumi.database.ThreadDao;
 import tikape.keskustelufoorumi.ui.UI;
 import tikape.keskustelufoorumi.database.Database;
 import tikape.keskustelufoorumi.database.MessageDao;
 import tikape.keskustelufoorumi.domain.Message;
-import tikape.keskustelufoorumi.database.IDao;
 import tikape.keskustelufoorumi.database.UserDao;
 import tikape.keskustelufoorumi.domain.Category;
 import tikape.keskustelufoorumi.domain.User;
@@ -17,9 +16,9 @@ import tikape.keskustelufoorumi.domain.User;
 public class TextUI implements UI {
     private Database database;
     private Scanner reader = null;
-    private IDao viestiDao = null;
-    private IDao kayttajaDao = null;
-    private IDao ketjuDao = null;
+    private MessageDao viestiDao = null;
+    private UserDao kayttajaDao = null;
+    private ThreadDao ketjuDao = null;
     
     public TextUI(Database database) {
         this.database = database;
@@ -28,7 +27,7 @@ public class TextUI implements UI {
     public void init() throws SQLException {
         this.viestiDao = new MessageDao(this.database);
         this.kayttajaDao = new UserDao(this.database);
-        this.ketjuDao = new CategoryDao(this.database);
+        this.ketjuDao = new ThreadDao(this.database);
     }
     
     private List<Integer> getIds(String str) {
@@ -66,7 +65,7 @@ public class TextUI implements UI {
                 switch(parts[0]) {
                     case "hae-viesti":
                         ids = getIds(parts[1]);
-                        List<Message> vs = this.viestiDao.findAllIn(ids);
+                        List<Message> vs = null; //this.viestiDao.findAllIn(ids);
                         
                         for(Message v : vs) {
                             System.out.println(v);
@@ -84,9 +83,9 @@ public class TextUI implements UI {
                         break;
                     case "hae-ketju":
                         ids = getIds(parts[1]);
-                        List<Category> kt = this.ketjuDao.findAllIn(ids);
+                        List<Thread> kt = null; //this.ketjuDao.findAllIn(ids);
                         
-                        for (Category k : kt) {
+                        for (Thread k : kt) {
                             System.out.println(k);
                         }
                         break;

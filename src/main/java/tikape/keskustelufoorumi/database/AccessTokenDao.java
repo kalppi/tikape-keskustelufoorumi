@@ -14,19 +14,13 @@ import tikape.keskustelufoorumi.domain.AccessToken;
  *
  * @author jarno
  */
-public class AccessTokenDao implements IDao<AccessToken, Integer> {
+public class AccessTokenDao {
     private Database database;
 
     public AccessTokenDao(Database database) {
         this.database = database;
     }
     
-    @Override
-    public AccessToken findOne(Integer key) {
-        return null;
-    }
-    
-    @Override
     public AccessToken findOneBy(String key, Object value) {
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = StatementBuilder.findOneBy(c, "Access_tokens", key, value, Arrays.asList("*"))) {
@@ -49,12 +43,6 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
         }
     }
     
-    @Override
-    public List<AccessToken> findAllIn(Collection<Integer> keys) {
-        return null;
-    }
-    
-    @Override
     public void delete(Integer key) {
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = StatementBuilder.delete(c, "Access_tokens", key)) {
@@ -78,10 +66,5 @@ public class AccessTokenDao implements IDao<AccessToken, Integer> {
             
             throw e;
         }
-    }
-
-    @Override
-    public List<AccessToken> findAllBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

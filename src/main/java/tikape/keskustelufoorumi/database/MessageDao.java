@@ -12,7 +12,7 @@ import java.util.Map;
 import tikape.keskustelufoorumi.domain.User;
 import tikape.keskustelufoorumi.domain.Message;
 
-public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message> {
+public class MessageDao {
     private Database database;
     private UserDao userDao;
 
@@ -21,117 +21,6 @@ public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message>
         this.userDao = new UserDao(this.database);
     }
     
-    /*
-    @Override
-    public Message findOne(Integer key) {
-        try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findOne(c, "Messages", key, Arrays.asList("*"))) {
-                try (ResultSet rs = s.executeQuery()) {
-                    if(!rs.next()) {
-                        return null;
-                    }
-
-                    Integer id = rs.getInt("id");
-                    Integer userId = rs.getInt("user_id");
-                    Integer threadId = rs.getInt("thread_id");
-                    String text = rs.getString("text");
-                    String sqlDate = rs.getString("sent");
-                    LocalDateTime sent = Helper.parseSqlDate(sqlDate);
-
-                    User user = this.userDao.findOne(userId);
-
-                    return new Message(id, user, threadId, sent, text);
-                }
-            }
-        } catch(SQLException e) {
-            e.printStackTrace();
-            
-            return null;
-        }
-    }
-    
-    @Override
-    public Message findOneBy(String key, Object value) {
-        try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findOneBy(c, "Messages", key, value, Arrays.asList("*"))) {
-                try (ResultSet rs = s.executeQuery()) {
-                    if(!rs.next()) {
-                        return null;
-                    }
-
-                    Integer id = rs.getInt("id");
-                    Integer userId = rs.getInt("user_id");
-                    Integer threadId = rs.getInt("thread_id");
-                    String text = rs.getString("text");
-                    String sqlDate = rs.getString("sent");
-                    LocalDateTime sent = Helper.parseSqlDate(sqlDate);
-
-                    User user = this.userDao.findOne(userId);
-
-                    return new Message(id, user, threadId, sent, text);
-                }
-            }
-        } catch(SQLException e) {
-            return null;
-        }
-    }
-    
-    @Override
-    public List<Message> findAllIn(Collection<Integer> keys) {
-        if(keys.isEmpty()) {
-            return new ArrayList();
-        }
-        
-        List<Message> viestit = new ArrayList();
-        
-        try (Connection c = this.database.getConnection()) {
-            List<String> fields = new ArrayList(Arrays.asList("id", "user_id", "thread_id", "text"));
-
-            fields.add("sent AT TIME ZONE 'Europe/Helsinki'");
-
-            try (PreparedStatement s = StatementBuilder.findAllIn(c, "Messages", keys, fields)) {
-                try (ResultSet rs = s.executeQuery()) {
-                    if(rs == null) {
-                        return new ArrayList();
-                    }
-
-                    Map<Integer, List<Message>> userMap = new HashMap();
-
-                    while(rs.next()) {
-                        Integer id = rs.getInt("id");
-                        Integer userId = rs.getInt("user_id");
-                        Integer threadId = rs.getInt("thread_id");
-                        String text = rs.getString("text");
-                        String sqlDate = rs.getString("sent");
-                        LocalDateTime sent = Helper.parseSqlDate(sqlDate);
-
-                        Message message = new Message(id, null, threadId, sent, text);
-                        viestit.add(message);
-
-                        if(!userMap.containsKey(userId)) {
-                            userMap.put(userId, new ArrayList());
-                        }
-
-                        userMap.get(userId).add(message);
-                    }
-
-                    List<User> users = this.userDao.findAllIn(userMap.keySet());
-
-                    for(User o : users) {
-                        for(Message v : userMap.get(o.getId())) {
-                            v.setUser(o);
-                        }
-                    }
-                }
-            }
-        } catch(SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return viestit;
-    }*/
-    
-    @Override
     public List<Message> findAllBy(String key, Object value, Integer start, Integer limit) {
         List<Message> messages = new ArrayList();
         String sql = "SELECT "
@@ -172,11 +61,6 @@ public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message>
         return messages;
     }
     
-    @Override
-    public void delete(Integer key) {
-        // ei toteutettu
-    }
-    
     public void insert(Integer threadId, Integer userId, String text) throws Exception {
         try (Connection c = this.database.getConnection()) {
             try(PreparedStatement s = c.prepareStatement("INSERT INTO Messages (user_id, thread_id, text) VALUES (?, ?, ?)")) {
@@ -206,30 +90,5 @@ public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message>
             e.printStackTrace();
             return 0;
         }
-    }
-
-    @Override
-    public List<Message> findAllBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<Message> findAll(Integer start, Integer limit) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Message findOne(Integer key) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Message findOneBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<Message> findAllIn(Collection<Integer> keys) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -11,14 +11,13 @@ import java.util.List;
 import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.domain.User;
 
-public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
+public class UserDao {
     private Database database;
 
     public UserDao(Database database) throws SQLException {
         this.database = database;
     }
 
-    @Override
     public User findOne(Integer key) {   
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = StatementBuilder.findOne(c, "Users", key, Arrays.asList("*"))) {
@@ -42,7 +41,6 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
         }
     }
     
-    @Override
     public User findOneBy(String key, Object value) {
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = StatementBuilder.findOneBy(c, "Users", key, value, Arrays.asList("*"))) {
@@ -89,7 +87,6 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
         }
     }
     
-    @Override
     public List<User> findAll(Integer start, Integer limit) {
         List<User> users = new ArrayList<>();
         
@@ -113,7 +110,6 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
         }
     }
     
-    @Override
     public List<User> findAllIn(Collection<Integer> keys) {
         if(keys.isEmpty()) {
             return new ArrayList();
@@ -144,12 +140,7 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
         
         return users;
     }
-
-    @Override
-    public void delete(Integer key) {
-        // ei toteutettu
-    }
-    
+        
     public void insert(String name, String pw, Boolean admin) throws Exception {
         String pwHash = Auth.hashPassword(pw);
         
@@ -166,15 +157,5 @@ public class UserDao implements IDao<User, Integer>, IPageableDao<User> {
             
             throw e;
         }
-    }
-
-    @Override
-    public List<User> findAllBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<User> findAllBy(String key, Object value, Integer start, Integer limit) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

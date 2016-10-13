@@ -13,7 +13,7 @@ import tikape.keskustelufoorumi.domain.Category;
 import tikape.keskustelufoorumi.domain.Message;
 import tikape.keskustelufoorumi.domain.User;
 
-public class CategoryDao implements IDao<Category, Integer> {
+public class CategoryDao {
     private Database database;
     private MessageDao messageDao;
 
@@ -22,8 +22,11 @@ public class CategoryDao implements IDao<Category, Integer> {
         this.messageDao = new MessageDao(database);
     }
     
-    @Override
-    public Category findOne(Integer key) {
+    public Category findOne(Integer id) {
+        return this.findOneBy("id", id);
+    }
+    
+    public Category findOneBy(String key, Object value) {
         String sql = "SELECT DISTINCT ON(c.id) "
                 + "c.id AS c_id, c.name AS c_name, COUNT(m.id) OVER (PARTITION BY c.id) AS c_message_count, "
                 + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
@@ -33,13 +36,13 @@ public class CategoryDao implements IDao<Category, Integer> {
                 + "LEFT JOIN Threads t ON t.category_id = c.id "
                 + "LEFT JOIN Messages m ON m.thread_id = t.id "
                 + "LEFT JOIN Users u ON u.id = m.user_id "
-                + "WHERE c.id = ? "
+                + "WHERE c." + key + " = ? "
                 + "GROUP BY c.id, m.id, u.id, t.id "
                 + "ORDER BY c.id ASC, m.sent DESC";
         
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = c.prepareStatement(sql)) {
-                s.setObject(1, key);
+                s.setObject(1, value);
 
                 try (ResultSet rs = s.executeQuery()) {
                     if(!rs.next()) {
@@ -59,11 +62,6 @@ public class CategoryDao implements IDao<Category, Integer> {
             e.printStackTrace();
         }
         
-        return null;
-    }
-    
-    @Override
-    public Category findOneBy(String key, Object value) {
         return null;
     }
     
@@ -117,20 +115,5 @@ public class CategoryDao implements IDao<Category, Integer> {
         }
         
         return categories;
-    }
-    
-    @Override
-    public List<Category> findAllIn(Collection<Integer> keys) {
-        return null;
-    }
-    
-    @Override
-    public void delete(Integer key) {
-        // ei toteutettu
-    }
-
-    @Override
-    public List<Category> findAllBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

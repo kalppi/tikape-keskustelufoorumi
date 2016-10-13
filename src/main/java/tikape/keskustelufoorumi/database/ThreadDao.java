@@ -16,7 +16,7 @@ import tikape.keskustelufoorumi.domain.User;
  *
  * @author jarnoluu
  */
-public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
+public class ThreadDao {
     private Database database;
     private MessageDao messageDao;
     
@@ -25,7 +25,7 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
         this.messageDao = new MessageDao(database);
     }
     
-    @Override
+    
     public Thread findOne(Integer key) {
         String sql = "SELECT DISTINCT ON (t.id) "
                 + "t.id AS t_id, t.category_id AS t_category_id, t.title AS t_title, COUNT(m.id) OVER (PARTITION BY t.id) AS t_message_count "
@@ -61,17 +61,7 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
             return null;
         }
     }
-
-    @Override
-    public List<Thread> findAllIn(Collection<Integer> keys) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void delete(Integer key) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
+        
     public Integer countBy(String key, Object value) {
         try (Connection c = this.database.getConnection()) {
             try(PreparedStatement s = c.prepareStatement("SELECT COUNT(*) FROM Threads t WHERE t." + key + " = ?")) {
@@ -91,7 +81,6 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
         }
     }
     
-    @Override
     public List<Thread> findAllBy(String key, Object value, Integer start, Integer limit) {
         List<Thread> threads = new ArrayList();
         
@@ -229,11 +218,6 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
         
         return threads;
     }
-
-    @Override
-    public Thread findOneBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
     
     public void insert(Integer categoryId, String title, Integer userId, String text) throws Exception {
         try (Connection c = this.database.getConnection()) {
@@ -275,15 +259,5 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
             e.printStackTrace();
             throw e;
         }
-    }
-
-    @Override
-    public List<Thread> findAllBy(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<Thread> findAll(Integer start, Integer limit) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
