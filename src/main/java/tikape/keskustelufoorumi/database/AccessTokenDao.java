@@ -23,7 +23,9 @@ public class AccessTokenDao {
     
     public AccessToken findOneBy(String key, Object value) {
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findOneBy(c, "Access_tokens", key, value, Arrays.asList("*"))) {
+            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Access_tokens WHERE " + key + " = ?")) {
+                s.setObject(1, value);
+                
                 try (ResultSet rs = s.executeQuery()) {
                     if(!rs.next()) {
                         return null;
@@ -45,7 +47,9 @@ public class AccessTokenDao {
     
     public void delete(Integer key) {
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.delete(c, "Access_tokens", key)) {
+            try (PreparedStatement s = c.prepareStatement("DELETE FROM Access_tokens WHERE id = ?")) {
+                s.setObject(1, key);
+                
                 s.execute();
             }
         } catch(SQLException e) {
@@ -55,7 +59,7 @@ public class AccessTokenDao {
     
     public void insert(String token, Integer userId) throws SQLException {
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.insert(c, "Access_tokens", Arrays.asList("token", "user_id"))) {
+            try (PreparedStatement s =  c.prepareStatement("INSERT INTO Access_tokens (token, user_id) VALUES (?, ?)")) {
                 s.setObject(1, token);
                 s.setObject(2, userId);
 

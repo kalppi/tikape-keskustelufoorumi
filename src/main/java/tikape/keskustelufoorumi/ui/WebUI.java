@@ -32,6 +32,9 @@ import tikape.keskustelufoorumi.database.CategoryDao;
 import tikape.keskustelufoorumi.database.MessageDao;
 import tikape.keskustelufoorumi.database.ThreadDao;
 import tikape.keskustelufoorumi.domain.Message;
+import static spark.Spark.get;
+import static spark.Spark.halt;
+import static spark.Spark.post;
 
 public class WebUI implements UI {
     private final Integer THREADS_IN_PAGE = 5;
@@ -192,11 +195,25 @@ public class WebUI implements UI {
         };
     }
     
-    private Route restricted(Consumer<Context> fnc) {
+    private Route adminRequired(Consumer<Context> fnc) {
         return (req, res) -> {
             Context ctx = getContext(req, res);
             
             if(!ctx.isAdmin()) {
+                halt(401);
+            } else if(fnc != null) {
+                fnc.accept(ctx);
+            }
+            
+            return null;
+        };
+    }
+    
+    private Route loginRequired(Consumer<Context> fnc) {
+        return (req, res) -> {
+            Context ctx = getContext(req, res);
+            
+            if(ctx.getLoggedInUser() == null) {
                 halt(401);
             } else if(fnc != null) {
                 fnc.accept(ctx);
@@ -232,15 +249,47 @@ public class WebUI implements UI {
         };
     }
     
-    private TemplateViewRoute restrictedView(String active, String layout) {
-        return restrictedView(active, layout, null);
+    private TemplateViewRoute adminRequiredView(String active, String layout) {
+        return adminRequiredView(active, layout, null);
     }
     
-    private TemplateViewRoute restrictedView(String active, String layout, Consumer<Context> fnc) { 
+    private TemplateViewRoute adminRequiredView(String active, String layout, Consumer<Context> fnc) { 
         return (req, res) -> {
             Context ctx = getContext(req, res);
             
             if(!ctx.isAdmin()) {
+                halt(401);
+                
+                return null;
+            }
+            
+            Menu menu = ctx.getMenu();
+            HashMap map = ctx.getMap();
+            
+            if(menu.getItemExists(active)) {
+                menu.setActive(active);
+            } else {
+                menu.removeActive();
+                map.put("title", active);
+            }
+
+            if(fnc != null) {
+                fnc.accept(ctx);
+            }
+            
+            return new ModelAndView(map, layout);
+        };
+    }
+    
+    private TemplateViewRoute loginRequiredView(String active, String layout) {
+        return loginRequiredView(active, layout, null);
+    }
+    
+    private TemplateViewRoute loginRequiredView(String active, String layout, Consumer<Context> fnc) { 
+        return (req, res) -> {
+            Context ctx = getContext(req, res);
+            
+            if(ctx.getLoggedInUser() == null) {
                 halt(401);
                 
                 return null;
@@ -349,7 +398,7 @@ public class WebUI implements UI {
             categoryFunc.accept(ctx, page);
         }), engine);
                 
-        post("/alue/:id", restricted((Context ctx) -> {
+        post("/alue/:id", loginRequired((Context ctx) -> {
             Request req = ctx.getRequest();
             Response res = ctx.getResponse();
             
@@ -401,7 +450,7 @@ public class WebUI implements UI {
             }
         }));
         
-        post("/ketju/:id", restricted((Context ctx) -> {
+        post("/ketju/:id", loginRequired((Context ctx) -> {
             Request req = ctx.getRequest();
             Response res = ctx.getResponse();
             
@@ -427,7 +476,7 @@ public class WebUI implements UI {
                 }
                 
                 ses.attribute("message-text", text);
-                
+                                
                 if(error == null) {
                     try {
                         this.messageDao.insert(threadId, ctx.getLoggedInUser().getId(), text);
@@ -497,7 +546,7 @@ public class WebUI implements UI {
             return null; 
         });
                 
-        get("/uusi-alue", restrictedView("Uusi alue", "uusi-alue"), engine);
+        get("/uusi-alue", adminRequiredView("Uusi alue", "uusi-alue"), engine);
         
         post("/kirjaudu", simple((Context ctx) -> {
             Request req = ctx.getRequest();
@@ -525,7 +574,7 @@ public class WebUI implements UI {
             }
         }));
         
-        post("/uusi-alue", restricted((Context ctx) -> {
+        post("/uusi-alue", adminRequired((Context ctx) -> {
             Request req = ctx.getRequest();
             
             if(req.queryParams("category-ok") != null) {

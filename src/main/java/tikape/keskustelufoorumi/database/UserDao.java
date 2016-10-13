@@ -20,7 +20,9 @@ public class UserDao {
 
     public User findOne(Integer key) {   
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findOne(c, "Users", key, Arrays.asList("*"))) {
+            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Users WHERE id = ?")) {
+                s.setObject(1, key);
+                
                 try (ResultSet rs = s.executeQuery()) {
                     if(!rs.next()) {
                         return null;
@@ -43,7 +45,9 @@ public class UserDao {
     
     public User findOneBy(String key, Object value) {
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findOneBy(c, "Users", key, value, Arrays.asList("*"))) {
+            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Users WHERE " + key + " = ?")) {
+                s.setObject(1, value);
+                
                 try (ResultSet rs = s.executeQuery()) {
                     if(!rs.next()) {
                         return null;
@@ -68,7 +72,7 @@ public class UserDao {
         List<User> users = new ArrayList<>();
         
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findAll(c, "Users", Arrays.asList("*"))) {
+            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Users ORDER BY id ASC")) {
                 try (ResultSet rs = s.executeQuery()) {
                     while(rs.next()) {
                         Integer id = rs.getInt("id");
@@ -91,7 +95,7 @@ public class UserDao {
         List<User> users = new ArrayList<>();
         
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findAll(c, "Users", Arrays.asList("*"), start, limit, "id" )) {
+            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Users ORDER BY id ASC LIMIT " + limit + " OFFSET " + start)) {
                 try (ResultSet rs = s.executeQuery()) {
                     while(rs.next()) {
                         Integer id = rs.getInt("id");
@@ -117,8 +121,18 @@ public class UserDao {
         
         List<User> users = new ArrayList();
         
+        StringBuilder str = new StringBuilder("?");
+        for (int i = 1; i < keys.size(); i++) {
+            str.append(", ?");
+        }
+        
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.findAllIn(c, "Users", keys, Arrays.asList("*"))) {
+            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Users WHERE id IN (" + str + ")")) {
+                int i = 1;
+                for(Integer key : keys) {
+                    s.setObject(i++, key);
+                }
+                
                 try (ResultSet rs = s.executeQuery()) {
                     if(rs == null) {
                         return new ArrayList();
@@ -145,7 +159,7 @@ public class UserDao {
         String pwHash = Auth.hashPassword(pw);
         
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = StatementBuilder.insert(c, "Users", Arrays.asList("name", "pw_hash", "admin"))) {
+            try (PreparedStatement s = c.prepareStatement("INSERT INTO Users (name, pw_hash, admin) VALUES (?, ?, ?)")) {
                 s.setObject(1, name);
                 s.setObject(2, pwHash);
                 s.setObject(3, admin);
