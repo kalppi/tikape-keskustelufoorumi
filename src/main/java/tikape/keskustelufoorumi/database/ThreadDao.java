@@ -51,7 +51,7 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
                     Integer categoryId = rs.getInt("t_category_id");
                     String title = rs.getString("t_title");
 
-                    Thread thread = new Thread(id, categoryId, title, null, null);
+                    Thread thread = new Thread(id, categoryId, title, null, null, null);
 
                     return thread;
                 }
@@ -95,7 +95,56 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
     public List<Thread> findAllBy(String key, Object value, Integer start, Integer limit) {
         List<Thread> threads = new ArrayList();
         
-        String sql = "SELECT * FROM ("
+        /*
+        
+        // vanha
+        
+        SELECT * FROM (
+        SELECT DISTINCT ON (t.id) 
+        t.id AS t_id, t.category_id AS t_category_id, t.title AS t_title, COUNT(m.id) OVER (PARTITION BY t.id) AS t_message_count, 
+        m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, 
+        u.id AS u_id, u.name AS u_name, u.admin AS u_admin 
+        FROM Threads t 
+        LEFT JOIN Messages m ON t.id = m.thread_id 
+        LEFT JOIN Users u ON u.id = m.user_id 
+        WHERE t.category_id = 1
+        GROUP BY t.id, m.id, u.id 
+        ORDER BY t.id ASC, m.sent DESC
+        ) q ORDER BY m_sent DESC 
+
+        
+        // uusi... i have created a monster
+        
+        SELECT DISTINCT ON(t.id, m.last_sent)
+        t.id AS t_id, t.title AS t_title, t.category_id AS t_category_id, t.title AS t_title, COUNT(m2.id) OVER (PARTITION BY t.id) AS t_message_count,
+        m.first_id AS m_first_id, m.first_sent AT TIME ZONE 'Europe/Helsinki' AS m_first_sent, m.last_id AS m_last_id, m.last_sent AT TIME ZONE 'Europe/Helsinki' AS m_last_sent,
+        uf.id AS u_first_id, ul.id AS u_last_id, uf.name AS u_first_name, ul.name AS u_last_name, uf.admin AS u_first_admin, ul.admin AS u_last_admin
+        FROM Threads t
+        INNER JOIN (
+                SELECT
+                        thread_id,
+                        first_value(user_id) OVER w1 AS first_user_id,
+                        first_value(id) OVER w1 AS first_id,
+                        first_value(sent) OVER w1 AS first_sent,
+                        first_value(user_id) OVER w2 AS last_user_id,
+                        first_value(id) OVER w2 AS last_id,
+                        first_value(sent) OVER w2 AS last_sent
+                FROM Messages
+                WINDOW
+                        w1 AS (PARTITION BY thread_id ORDER BY sent ASC),
+                        w2 AS (PARTITION BY thread_id ORDER BY sent DESC)
+        ) m ON t.id = m.thread_id
+        INNER JOIN Messages m2 ON t.id = m2.thread_id
+        INNER JOIN Users uf ON uf.id = m.first_user_id
+        INNER JOIN Users ul ON ul.id = m.last_user_id
+        WHERE t.category_id = 1
+        GROUP BY t.id, m2.id, m.thread_id, m.first_id, m.last_id, m.first_sent, m.last_sent, uf.id, ul.id
+        ORDER BY m.last_sent DESC
+        LIMIT 5 OFFSET 0
+        
+        */
+        
+        /*String sql = "SELECT * FROM ("
                 + "SELECT DISTINCT ON (t.id) "
                 + "t.id AS t_id, t.category_id AS t_category_id, t.title AS t_title, COUNT(m.id) OVER (PARTITION BY t.id) AS t_message_count, "
                 + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
@@ -107,7 +156,34 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
                 + "GROUP BY t.id, m.id, u.id "
                 + "ORDER BY t.id ASC, m.sent DESC"
                 + ") q ORDER BY m_sent DESC "
-                + "LIMIT " + limit + " OFFSET " + start;
+                + "LIMIT " + limit + " OFFSET " + start;*/
+        
+        String sql = "SELECT DISTINCT ON(t.id, m.last_sent)\n" +
+"        t.id AS t_id, t.title AS t_title, t.category_id AS t_category_id, t.title AS t_title, COUNT(m2.id) OVER (PARTITION BY t.id) AS t_message_count,\n" +
+"        m.first_id AS m_first_id, m.first_sent AT TIME ZONE 'Europe/Helsinki' AS m_first_sent, m.last_id AS m_last_id, m.last_sent AT TIME ZONE 'Europe/Helsinki' AS m_last_sent,\n" +
+"        uf.id AS u_first_id, ul.id AS u_last_id, uf.name AS u_first_name, ul.name AS u_last_name, uf.admin AS u_first_admin, ul.admin AS u_last_admin\n" +
+"        FROM Threads t\n" +
+"        INNER JOIN (\n" +
+"                SELECT\n" +
+"                        thread_id,\n" +
+"                        first_value(user_id) OVER w1 AS first_user_id,\n" +
+"                        first_value(id) OVER w1 AS first_id,\n" +
+"                        first_value(sent) OVER w1 AS first_sent,\n" +
+"                        first_value(user_id) OVER w2 AS last_user_id,\n" +
+"                        first_value(id) OVER w2 AS last_id,\n" +
+"                        first_value(sent) OVER w2 AS last_sent\n" +
+"                FROM Messages\n" +
+"                WINDOW\n" +
+"                        w1 AS (PARTITION BY thread_id ORDER BY sent ASC),\n" +
+"                        w2 AS (PARTITION BY thread_id ORDER BY sent DESC)\n" +
+"        ) m ON t.id = m.thread_id\n" +
+"        INNER JOIN Messages m2 ON t.id = m2.thread_id\n" +
+"        INNER JOIN Users uf ON uf.id = m.first_user_id\n" +
+"        INNER JOIN Users ul ON ul.id = m.last_user_id\n" +
+"        WHERE t." + key + " = ?\n" +
+"        GROUP BY t.id, m2.id, m.thread_id, m.first_id, m.last_id, m.first_sent, m.last_sent, uf.id, ul.id\n" +
+"        ORDER BY m.last_sent DESC\n" +
+"        LIMIT " + limit + " OFFSET " + start;
         
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = c.prepareStatement(sql)) {
@@ -115,21 +191,33 @@ public class ThreadDao implements IDao<Thread, Integer>, IPageableDao<Thread>  {
 
                 try (ResultSet rs = s.executeQuery()) {
                     while(rs.next()) {
-                        Integer uId = rs.getInt("u_id");
-                        String uName = rs.getString("u_name");
-                        Boolean uAdmin = rs.getBoolean("u_admin");
+                        Integer uFirstId = rs.getInt("u_first_id");
+                        String uFirstName = rs.getString("u_first_name");
+                        Boolean uFirstAdmin = rs.getBoolean("u_first_admin");
+                        
+                        Integer uLastId = rs.getInt("u_last_id");
+                        String uLastName = rs.getString("u_last_name");
+                        Boolean uLastAdmin = rs.getBoolean("u_last_admin");
 
-                        Integer mId = rs.getInt("m_id");
                         Integer tId = rs.getInt("t_id");
-                        LocalDateTime sent = rs.getTimestamp("m_sent").toLocalDateTime();
+                        
+                        Integer mFirstId = rs.getInt("m_first_id");
+                        LocalDateTime mFirstSent = rs.getTimestamp("m_first_sent").toLocalDateTime();
+                        
+                        Integer mLastId = rs.getInt("m_last_id");
+                        LocalDateTime mLastSent = rs.getTimestamp("m_last_sent").toLocalDateTime();
 
                         Integer tCategoryId = rs.getInt("t_category_id");
                         String title = rs.getString("t_title");
                         Integer messageCount = rs.getInt("t_message_count");
 
-                        User user = new User(uId, uName, null, uAdmin);
-                        Message message = new Message(mId, user, tId, sent, null);
-                        Thread thread = new Thread(tId, tCategoryId, title, messageCount, message);
+                        User firstUser = new User(uFirstId, uFirstName, null, uFirstAdmin);
+                        User lastUser = new User(uLastId, uLastName, null, uLastAdmin);
+                        
+                        Message firstMessage = new Message(mFirstId, firstUser, tId, mFirstSent, null);
+                        Message latestMessage = new Message(mLastId, lastUser, tId, mLastSent, null);
+                        
+                        Thread thread = new Thread(tId, tCategoryId, title, messageCount, firstMessage, latestMessage);
 
                         threads.add(thread);
                     }

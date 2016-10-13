@@ -11,13 +11,15 @@ public class Thread {
     private Integer categoryId;
     private String title;
     private Integer messageCount;
+    private Message firstMessage;
     private Message latestMessage;
 
-    public Thread(Integer id, Integer categoryId, String title, Integer messageCount, Message latestMessage) {
+    public Thread(Integer id, Integer categoryId, String title, Integer messageCount, Message firstMessage, Message latestMessage) {
         this.id = id;
         this.categoryId = categoryId;
         this.title = title;
         this.messageCount = messageCount;
+        this.firstMessage = firstMessage;
         this.latestMessage = latestMessage;
     }
 
@@ -32,9 +34,13 @@ public class Thread {
     public String getTitle() {
         return this.title;
     }
+    
+    public Message getFirstMessage() {
+        return this.firstMessage;
+    }
 
     public Message getLatestMessage() {
-        return latestMessage;
+        return this.latestMessage;
     }
     
     public Integer getMessageCount() {

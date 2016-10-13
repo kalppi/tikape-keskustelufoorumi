@@ -12,13 +12,14 @@
 
 <table class="table">
     <tr>
-        <th class="a">Otsikko</th><th class="b">Viestejä</th><th class="c">Viimeisin viesti</th>
+        <th class="a">Otsikko</th><th class="b">Viestejä</th><th class="c">Aloitus</th><th class="d">Viimeisin</th>
     </tr>
     {{#threads}}
     <tr>
         <td class="a"><a href="{{url '/ketju/' id '-' title}}">{{title}}</a></td>
         <td class="b">{{messageCount}}</td>
-        <td class="c">{{dt latestMessage.sent}}</td>
+        <td class="c">{{dt firstMessage.sent}}</td>
+        <td class="d">{{dt latestMessage.sent}}</td>
     </tr>
     {{/threads}}
 </table>
