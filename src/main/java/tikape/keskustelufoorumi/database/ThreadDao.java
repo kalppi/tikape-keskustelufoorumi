@@ -127,7 +127,6 @@ public class ThreadDao {
         INNER JOIN Users uf ON uf.id = m.first_user_id
         INNER JOIN Users ul ON ul.id = m.last_user_id
         WHERE t.category_id = 1
-        GROUP BY t.id, m2.id, m.thread_id, m.first_id, m.last_id, m.first_sent, m.last_sent, uf.id, ul.id
         ORDER BY m.last_sent DESC
         LIMIT 5 OFFSET 0
         
@@ -170,7 +169,6 @@ public class ThreadDao {
 "        INNER JOIN Users uf ON uf.id = m.first_user_id\n" +
 "        INNER JOIN Users ul ON ul.id = m.last_user_id\n" +
 "        WHERE t." + key + " = ?\n" +
-"        GROUP BY t.id, m2.id, m.thread_id, m.first_id, m.last_id, m.first_sent, m.last_sent, uf.id, ul.id\n" +
 "        ORDER BY m.last_sent DESC\n" +
 "        LIMIT " + limit + " OFFSET " + start;
         
