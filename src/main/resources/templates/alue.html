@@ -18,8 +18,14 @@
     <tr>
         <td class="a"><a href="{{url '/ketju/' id '-' title}}">{{title}}</a></td>
         <td class="b">{{messageCount}}</td>
-        <td class="c">{{dt firstMessage.sent}}</td>
-        <td class="d">{{dt latestMessage.sent}}</td>
+        <td class="c">
+            <div>{{dt firstMessage.sent}}</div>
+            <div><a href="{{url '/kayttaja/' firstMessage.user.id}}">{{firstMessage.user.name}}</a></div>
+        </td>
+        <td class="d">
+            <div>{{dt latestMessage.sent}}</div>
+            <div><a href="{{url '/kayttaja/' firstMessage.user.id}}">{{latestMessage.user.name}}</a></div>
+        </td>
     </tr>
     {{/threads}}
 </table>
