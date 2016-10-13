@@ -15,13 +15,6 @@ public class Helper {
         return str.replaceAll("<", "&lt;").replaceAll(">", "&lt;");
     }
 
-    public static LocalDateTime parseSqlDate(String dateString) {
-        LocalDateTime date = null;
-        date = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            
-        return date;
-    }
-    
     private static Pattern linkPattern = null;
     
     public static String linkify(String text) {

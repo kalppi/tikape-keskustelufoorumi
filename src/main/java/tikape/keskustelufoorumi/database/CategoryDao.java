@@ -70,33 +70,18 @@ public class CategoryDao implements IDao<Category, Integer> {
     public List<Category> findAll() {
         List<Category> categories = new ArrayList<>();
 
-        String sql = null;
-        
-        if(this.database.isPostgres()) {
-            sql = "SELECT DISTINCT ON(c.name)"
-                    + "c.id AS c_id, c.name AS c_name, COUNT(m.id) OVER (PARTITION BY c.id) AS c_message_count, "
-                    + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
-                    + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin, "
-                    + "t.id AS t_id "
-                    + "FROM Categories c "
-                    + "LEFT JOIN Threads t ON t.category_id = c.id "
-                    + "LEFT JOIN Messages m ON m.thread_id = t.id "
-                    + "LEFT JOIN Users u ON u.id = m.user_id " 
-                    + "GROUP BY c.id, m.id, u.id, t.id "
-                    + "ORDER BY c.name ASC, m.sent DESC;";
-        } else {
-           sql = "SELECT "
-                + "c.id AS c_id, c.name AS c_name, COUNT(m.id) AS c_message_count, "
-                + "m.id AS m_id, u.id AS u_id, u.name AS u_name, u.admin AS u_admin, t.id AS t_id, "
-                + "DATETIME(MAX(m.sent), 'localtime') AS m_sent "
-                + "FROM Categories c "
-                + "LEFT JOIN Threads t ON t.category_id = c.id "
-                + "LEFT JOIN Messages m ON m.thread_id = t.id "
-                + "LEFT JOIN Users u ON u.id = m.user_id "
-                + "GROUP BY c.id "
-                + "ORDER BY c.id ASC";
-        }
-                
+        String sql = "SELECT DISTINCT ON(c.name)"
+            + "c.id AS c_id, c.name AS c_name, COUNT(m.id) OVER (PARTITION BY c.id) AS c_message_count, "
+            + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
+            + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin, "
+            + "t.id AS t_id "
+            + "FROM Categories c "
+            + "LEFT JOIN Threads t ON t.category_id = c.id "
+            + "LEFT JOIN Messages m ON m.thread_id = t.id "
+            + "LEFT JOIN Users u ON u.id = m.user_id " 
+            + "GROUP BY c.id, m.id, u.id, t.id "
+            + "ORDER BY c.name ASC, m.sent DESC;";
+            
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = c.prepareStatement(sql)) {
                 try (ResultSet rs = s.executeQuery()) {
@@ -116,12 +101,7 @@ public class CategoryDao implements IDao<Category, Integer> {
                         LocalDateTime sent = null;
 
                         if(tId != 0) {                    
-                            if(this.database.isPostgres()) {
-                                sent = rs.getTimestamp("m_sent").toLocalDateTime();
-                            } else {
-                                String sqlDate = rs.getString("m_sent");
-                                sent = Helper.parseSqlDate(sqlDate);
-                            }
+                            sent = rs.getTimestamp("m_sent").toLocalDateTime();
                         }
 
                         User user = new User(uId, uName, null, uAdmin);

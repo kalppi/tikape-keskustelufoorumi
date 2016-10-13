@@ -15,6 +15,7 @@ CREATE TABLE Messages (id SERIAL PRIMARY KEY, user_id INTEGER, thread_id INTEGER
 CREATE TABLE Access_tokens (id SERIAL PRIMARY KEY, token VARCHAR(44), user_id INTEGER,
     FOREIGN KEY(user_id) REFERENCES Users(id));
 
+INSERT INTO Users (name, pw_hash, admin) VALUES ('JAVA-MAN', '', FALSE);
 INSERT INTO Users (name, pw_hash, admin) VALUES ('Platon', '', FALSE);
 INSERT INTO Users (name, pw_hash, admin) VALUES ('Aristoteles', '', FALSE);
 INSERT INTO Users (name, pw_hash, admin) VALUES ('Homeros', '', FALSE);

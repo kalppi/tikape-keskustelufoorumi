@@ -6,12 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import tikape.keskustelufoorumi.Helper;
 import tikape.keskustelufoorumi.domain.User;
 import tikape.keskustelufoorumi.domain.Message;
 
@@ -24,6 +21,7 @@ public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message>
         this.userDao = new UserDao(this.database);
     }
     
+    /*
     @Override
     public Message findOne(Integer key) {
         try (Connection c = this.database.getConnection()) {
@@ -89,11 +87,7 @@ public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message>
         try (Connection c = this.database.getConnection()) {
             List<String> fields = new ArrayList(Arrays.asList("id", "user_id", "thread_id", "text"));
 
-            if(this.database.isPostgres()) {
-                fields.add("sent AT TIME ZONE 'Europe/Helsinki'");
-            } else {
-                fields.add("DATETIME(sent, 'localtime') AS sent");
-            }
+            fields.add("sent AT TIME ZONE 'Europe/Helsinki'");
 
             try (PreparedStatement s = StatementBuilder.findAllIn(c, "Messages", keys, fields)) {
                 try (ResultSet rs = s.executeQuery()) {
@@ -135,7 +129,7 @@ public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message>
         }
         
         return viestit;
-    }
+    }*/
     
     @Override
     public List<Message> findAllBy(String key, Object value, Integer start, Integer limit) {
@@ -221,6 +215,21 @@ public class MessageDao implements IDao<Message, Integer>, IPageableDao<Message>
 
     @Override
     public List<Message> findAll(Integer start, Integer limit) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Message findOne(Integer key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Message findOneBy(String key, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<Message> findAllIn(Collection<Integer> keys) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
