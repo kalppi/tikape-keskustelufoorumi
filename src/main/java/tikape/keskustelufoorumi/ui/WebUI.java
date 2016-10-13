@@ -4,11 +4,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.Session;
 import spark.TemplateEngine;
 import tikape.keskustelufoorumi.MyTemplate;
@@ -22,19 +19,14 @@ import tikape.keskustelufoorumi.validator.*;
 import tikape.keskustelufoorumi.Auth;
 import tikape.keskustelufoorumi.Context;
 import tikape.keskustelufoorumi.database.AccessTokenDao;
-import tikape.keskustelufoorumi.domain.AccessToken;
 import tikape.keskustelufoorumi.validator.EqualsRule;
-import static spark.Spark.get;
-import static spark.Spark.halt;
-import static spark.Spark.post;
-import spark.TemplateViewRoute;
 import tikape.keskustelufoorumi.database.CategoryDao;
 import tikape.keskustelufoorumi.database.MessageDao;
 import tikape.keskustelufoorumi.database.ThreadDao;
 import tikape.keskustelufoorumi.domain.Message;
 import static spark.Spark.get;
-import static spark.Spark.halt;
 import static spark.Spark.post;
+import tikape.keskustelufoorumi.ViewManager;
 
 public class WebUI implements UI {
     private final Integer THREADS_IN_PAGE = 5;
@@ -47,10 +39,10 @@ public class WebUI implements UI {
     private ThreadDao threadDao;
     private MessageDao messageDao;
     
+    private ViewManager viewManager;
+    
     private AccessTokenDao accessTokenDao;
-    
-    private Menu menu;
-    
+        
     public WebUI(Database database) {
         this.database = database;
     }
@@ -73,18 +65,20 @@ public class WebUI implements UI {
         port(port);
         staticFileLocation("/public");
         
-        this.menu = new Menu();
-        this.menu.addItem("home", "Keskustelu", "/");
-        this.menu.addItem("users", "Käyttäjät", "/kayttajat");
-        this.menu.addItem("login", "Kirjaudu", "/kirjaudu", (Context ctx) -> {
+        Menu menu = new Menu();
+        menu.addItem("home", "Keskustelu", "/");
+        menu.addItem("users", "Käyttäjät", "/kayttajat");
+        menu.addItem("login", "Kirjaudu", "/kirjaudu", (Context ctx) -> {
             return ctx.getLoggedInUser() == null;
         });
-        this.menu.addItem("register", "Rekisteröidy", "/rekisteroidy", (Context ctx) -> {
+        menu.addItem("register", "Rekisteröidy", "/rekisteroidy", (Context ctx) -> {
             return ctx.getLoggedInUser() == null;
         });
-        this.menu.addItem("logout", "Kirjaudu ulos", "/ulos", (Context ctx) -> {
+        menu.addItem("logout", "Kirjaudu ulos", "/ulos", (Context ctx) -> {
             return ctx.getLoggedInUser() != null;
         });
+        
+        this.viewManager = new ViewManager(this.database, menu);
     }
     
     private Integer extractId(String text) {
@@ -105,66 +99,7 @@ public class WebUI implements UI {
             return 0;
         }
     }
-    
-    private Context getContext(Request req, Response res) {
-        Context ctx = new Context();
-        HashMap map = new HashMap<>();
-        Session ses = req.session();
-        
-        String path = req.pathInfo();
-        
-        if(!path.equals(ses.attribute("currentPage"))) {
-            ses.attribute("lastPage", ses.attribute("currentPage"));
-            ses.attribute("currentPage", path);
-        }
-        
-        ctx.setLastPage(ses.attribute("lastPage"));        
-        ctx.setMap(map);
-                
-        /*
-        
-        mikäli löytyy käytössä oleva access_token keksi, kirjataan käyttäjä sisään
-        
-        */
-        if(req.cookies().containsKey("access_token")) {
-            AccessToken token = this.accessTokenDao.findOneBy("token", req.cookies().get("access_token"));
-            
-            if(token != null) {
-                User user = this.userDao.findOne(token.getUserId());
-                
-                ctx.setAccessToken(token);
-                ctx.setLoggedInUser(user);
-                
-                map.put("user", user);
-            }
-        }
-        
-        /*
-        
-        Siirretään mahdollisten ilmoitusten arvot sessiomuuttujista näkymän mappiin
-        
-        */
-        
-        map.put("success", ses.attribute("success"));
-        map.put("error", ses.attribute("error"));
-        map.put("info", ses.attribute("info"));
-        map.put("warning", ses.attribute("warning"));
-        
-        ses.attribute("success", null);
-        ses.attribute("error", null);
-        ses.attribute("info", null);
-        ses.attribute("warning", null);
-        
-        Menu userMenu = this.menu.buildWithContext(ctx);
-        
-        ctx.setMenu(userMenu);
-        map.put("menu", userMenu);
-        
-        ctx.setReqRes(req, res);
-        
-        return ctx;
-    }
-    
+       
     private Boolean login(Response res, User o) {
         try {
             String token = Auth.generateAccessToken();
@@ -178,145 +113,15 @@ public class WebUI implements UI {
         return true;
     }
     
-    private void logout(Response res, Context ctx) throws SQLException {
+    private void logout(Response res, Context ctx) {
         this.accessTokenDao.delete(ctx.getAccessToken().getId());
         res.removeCookie("access_token");
     }
-    
-    private Route simple(Consumer<Context> fnc) {
-        return (req, res) -> {
-            Context ctx = getContext(req, res);
-            
-            if(fnc != null) {
-                fnc.accept(ctx);
-            }
-            
-            return null;
-        };
-    }
-    
-    private Route adminRequired(Consumer<Context> fnc) {
-        return (req, res) -> {
-            Context ctx = getContext(req, res);
-            
-            if(!ctx.isAdmin()) {
-                halt(401);
-            } else if(fnc != null) {
-                fnc.accept(ctx);
-            }
-            
-            return null;
-        };
-    }
-    
-    private Route loginRequired(Consumer<Context> fnc) {
-        return (req, res) -> {
-            Context ctx = getContext(req, res);
-            
-            if(ctx.getLoggedInUser() == null) {
-                halt(401);
-            } else if(fnc != null) {
-                fnc.accept(ctx);
-            }
-            
-            return null;
-        };
-    }
-    
-    private TemplateViewRoute simpleView(String active, String layout) {
-        return simpleView(active, layout, null);
-    }
-    
-    private TemplateViewRoute simpleView(String active, String layout, Consumer<Context> fnc) { 
-        return (req, res) -> {
-            Context ctx = getContext(req, res);
-            
-            Menu menu = ctx.getMenu();
-            HashMap map = ctx.getMap();
-            
-            if(menu.getItemExists(active)) {
-                menu.setActive(active);
-            } else {
-                menu.removeActive();
-                map.put("title", active);
-            }
 
-            if(fnc != null) {
-                fnc.accept(ctx);
-            }
-            
-            return new ModelAndView(map, layout);
-        };
-    }
-    
-    private TemplateViewRoute adminRequiredView(String active, String layout) {
-        return adminRequiredView(active, layout, null);
-    }
-    
-    private TemplateViewRoute adminRequiredView(String active, String layout, Consumer<Context> fnc) { 
-        return (req, res) -> {
-            Context ctx = getContext(req, res);
-            
-            if(!ctx.isAdmin()) {
-                halt(401);
-                
-                return null;
-            }
-            
-            Menu menu = ctx.getMenu();
-            HashMap map = ctx.getMap();
-            
-            if(menu.getItemExists(active)) {
-                menu.setActive(active);
-            } else {
-                menu.removeActive();
-                map.put("title", active);
-            }
-
-            if(fnc != null) {
-                fnc.accept(ctx);
-            }
-            
-            return new ModelAndView(map, layout);
-        };
-    }
-    
-    private TemplateViewRoute loginRequiredView(String active, String layout) {
-        return loginRequiredView(active, layout, null);
-    }
-    
-    private TemplateViewRoute loginRequiredView(String active, String layout, Consumer<Context> fnc) { 
-        return (req, res) -> {
-            Context ctx = getContext(req, res);
-            
-            if(ctx.getLoggedInUser() == null) {
-                halt(401);
-                
-                return null;
-            }
-            
-            Menu menu = ctx.getMenu();
-            HashMap map = ctx.getMap();
-            
-            if(menu.getItemExists(active)) {
-                menu.setActive(active);
-            } else {
-                menu.removeActive();
-                map.put("title", active);
-            }
-
-            if(fnc != null) {
-                fnc.accept(ctx);
-            }
-            
-            return new ModelAndView(map, layout);
-        };
-    }
-    
     public void start() {
         TemplateEngine engine = new MyTemplate();
         
-        get("/", simpleView("home", "index", (Context ctx) -> {
+        get("/", this.viewManager.simpleView("home", "index", (Context ctx) -> {
             HashMap map = ctx.getMap();
                         
             List<Category> categories = this.categoryDao.findAll();
@@ -324,20 +129,20 @@ public class WebUI implements UI {
             map.put("categories", categories);
         }), engine);
         
-        get("/kayttajat", simpleView("users", "kayttajat", (Context ctx) -> {
+        get("/kayttajat", this.viewManager.simpleView("users", "kayttajat", (Context ctx) -> {
             List<User> users = this.userDao.findAll(0, 3);
             
             ctx.getMap().put("users", users);
         }), engine);
         
-        get("/kayttajat/:sivu", simpleView("users", "kayttajat", (Context ctx) -> {
+        get("/kayttajat/:sivu", this.viewManager.simpleView("users", "kayttajat", (Context ctx) -> {
             Integer page = extractPage(ctx.getRequest().params(":sivu"));
             List<User> users = this.userDao.findAll((page - 1) * 3, 3);
             
             ctx.getMap().put("users", users);
         }), engine);
         
-        get("/kirjaudu", simpleView("login", "kirjaudu", (Context ctx) -> {     
+        get("/kirjaudu", this.viewManager.simpleView("login", "kirjaudu", (Context ctx) -> {     
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             Session ses = req.session();
@@ -347,7 +152,7 @@ public class WebUI implements UI {
             req.session().attribute("login-name", null);
         }), engine);
         
-        get("/rekisteroidy", simpleView("register", "rekisteroidy", (Context ctx) -> {
+        get("/rekisteroidy", this.viewManager.simpleView("register", "rekisteroidy", (Context ctx) -> {
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
             
@@ -381,11 +186,11 @@ public class WebUI implements UI {
             map.put("currentPage", page);
         };
         
-        get("/alue/:id", simpleView("home", "alue", (Context ctx) -> {
+        get("/alue/:id", this.viewManager.simpleView("home", "alue", (Context ctx) -> {
             categoryFunc.accept(ctx, 1);
         }), engine);
         
-        get("/alue/:id/sivu/:page", simpleView("home", "alue", (Context ctx) -> {
+        get("/alue/:id/sivu/:page", this.viewManager.simpleView("home", "alue", (Context ctx) -> {
             Request req = ctx.getRequest();
             
             Integer page = 1;
@@ -398,7 +203,7 @@ public class WebUI implements UI {
             categoryFunc.accept(ctx, page);
         }), engine);
                 
-        post("/alue/:id", loginRequired((Context ctx) -> {
+        post("/alue/:id", this.viewManager.loginRequired((Context ctx) -> {
             Request req = ctx.getRequest();
             Response res = ctx.getResponse();
             
@@ -450,7 +255,7 @@ public class WebUI implements UI {
             }
         }));
         
-        post("/ketju/:id", loginRequired((Context ctx) -> {
+        post("/ketju/:id", this.viewManager.loginRequired((Context ctx) -> {
             Request req = ctx.getRequest();
             Response res = ctx.getResponse();
             
@@ -517,11 +322,11 @@ public class WebUI implements UI {
             map.put("currentPage", page);
         };
         
-        get("/ketju/:id", simpleView("home", "ketju", (Context ctx) -> {
+        get("/ketju/:id", this.viewManager.simpleView("home", "ketju", (Context ctx) -> {
             threadFunc.accept(ctx, 1);
         }), engine);
         
-        get("/ketju/:id/sivu/:page", simpleView("home", "ketju", (Context ctx) -> {
+        get("/ketju/:id/sivu/:page", this.viewManager.simpleView("home", "ketju", (Context ctx) -> {
             Request req = ctx.getRequest();
             
             Integer page = 1;
@@ -534,21 +339,18 @@ public class WebUI implements UI {
             threadFunc.accept(ctx, page);
         }), engine);
         
-        get("/ulos", (req, res) -> {
-            Context ctx = getContext(req, res);
-            Session ses = req.session();
+        get("/ulos", this.viewManager.loginRequired((Context ctx) -> {
+            Response res = ctx.getResponse();
             
             if(ctx.getAccessToken() != null) {
                 logout(res, ctx);
                 res.redirect(ctx.getLastPage());
             }
-            
-            return null; 
-        });
+        }));
                 
-        get("/uusi-alue", adminRequiredView("Uusi alue", "uusi-alue"), engine);
+        get("/uusi-alue", this.viewManager.adminRequiredView("Uusi alue", "uusi-alue"), engine);
         
-        post("/kirjaudu", simple((Context ctx) -> {
+        post("/kirjaudu", this.viewManager.simple((Context ctx) -> {
             Request req = ctx.getRequest();
             Response res = ctx.getResponse();
             
@@ -574,7 +376,7 @@ public class WebUI implements UI {
             }
         }));
         
-        post("/uusi-alue", adminRequired((Context ctx) -> {
+        post("/uusi-alue", this.viewManager.adminRequired((Context ctx) -> {
             Request req = ctx.getRequest();
             
             if(req.queryParams("category-ok") != null) {
@@ -599,7 +401,7 @@ public class WebUI implements UI {
             }
         }));
         
-        post("/rekisteroidy", simple((Context ctx) -> {
+        post("/rekisteroidy", this.viewManager.simple((Context ctx) -> {
             Request req = ctx.getRequest();
             Response res = ctx.getResponse();
             
