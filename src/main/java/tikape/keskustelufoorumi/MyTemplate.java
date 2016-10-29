@@ -103,6 +103,17 @@ public class MyTemplate extends TemplateEngine {
             } 
         });
         
+        this.engine.registerHelper("format", new Helper<LocalDateTime>() {
+           public CharSequence apply(LocalDateTime a, Options options) {
+                try {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(options.param(0));
+                    return a.format(formatter);
+                } catch(Exception e) {
+                    return "";
+                }
+            } 
+        });
+        
         this.engine.registerHelper("calc", new Helper<String>() {
             public CharSequence apply(String oper, Options options) {
                 try {

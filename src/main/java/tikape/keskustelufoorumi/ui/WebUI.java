@@ -42,6 +42,11 @@ public class WebUI implements UI {
     private ViewManager viewManager;
     
     private AccessTokenDao accessTokenDao;
+    
+    Validator messageValidator;
+    Validator titleValidator;
+    Validator categoryNameValidator;
+    Validator userNameValidator;
         
     public WebUI(Database database) {
         this.database = database;
@@ -79,6 +84,22 @@ public class WebUI implements UI {
         });
         
         this.viewManager = new ViewManager(this.database, menu);
+        
+        this.messageValidator = new Validator();
+        this.messageValidator.addRule(new MinLengthRule(3, "viestin pitää olla vähintään 3 merkkiä"));
+        this.messageValidator.addRule(new MaxLengthRule(2000, "viesti saa olla enintään 2000 merkkiä"));
+        
+        this.titleValidator = new Validator();
+        this.titleValidator.addRule(new MinLengthRule(3, "otsikon pitää olla vähintään 3 merkkiä"));
+        this.titleValidator.addRule(new MaxLengthRule(255, "otsikko saa olla enintään 255 merkkiä"));
+        
+        this.categoryNameValidator = new Validator();
+        this.categoryNameValidator.addRule(new MinLengthRule(3, "nimen pitää olla vähintään 3 merkkiä"));
+        
+        this.userNameValidator = new Validator();
+        this.userNameValidator.addRule(new MinLengthRule(3, "nimen pitää olla vähintään 3 merkkiä"));
+        this.userNameValidator.addRule(new MaxLengthRule(20, "nimi ei saa olla yli 20 merkkiä pitkä"));
+        this.userNameValidator.addRule(new PatternRule("^[a-zA-Z0-9]+$", "nimi saa sisältää vain kirjaimia ja numeroita"));
     }
     
     private Integer extractId(String text) {
@@ -130,22 +151,35 @@ public class WebUI implements UI {
         }), engine);
         
         get("/kayttajat", this.viewManager.simpleView("users", "kayttajat", (Context ctx) -> {
-            List<User> users = this.userDao.findAll(0, 3);
+            List<User> users = this.userDao.findAll();
             
             ctx.getMap().put("users", users);
         }), engine);
         
-        get("/kayttajat/:sivu", this.viewManager.simpleView("users", "kayttajat", (Context ctx) -> {
-            Integer page = extractPage(ctx.getRequest().params(":sivu"));
-            List<User> users = this.userDao.findAll((page - 1) * 3, 3);
+        get("/kayttaja/:id", this.viewManager.simpleView("users", "kayttaja", (Context ctx) -> {
+            Request req = ctx.getRequest();
+            HashMap map = ctx.getMap();
             
-            ctx.getMap().put("users", users);
+            Integer id;
+            
+            try {
+                id = Integer.parseInt(req.params(":id"));
+            } catch(Exception e) {
+                return;
+            }
+            
+            User user = this.userDao.findOne(id);
+            
+            if(user == null) {
+                return;
+            }
+            
+            map.put("userProfile", user);
         }), engine);
-        
+                
         get("/kirjaudu", this.viewManager.simpleView("login", "kirjaudu", (Context ctx) -> {     
             Request req = ctx.getRequest();
             HashMap map = ctx.getMap();
-            Session ses = req.session();
             
             map.put("lastPage", ctx.getLastPage());
             map.put("login-name", req.session().attribute("login-name"));
@@ -218,21 +252,13 @@ public class WebUI implements UI {
                 } catch(Exception e) {
                     return;
                 }
-                
-                Validator titleValidator = new Validator();
-                titleValidator.addRule(new MinLengthRule(3, "otsikon pitää olla vähintään 3 merkkiä"));
-                titleValidator.addRule(new MaxLengthRule(255, "otsikko saa olla enintään 255 merkkiä"));
-                
-                Validator messageValidator = new Validator();
-                messageValidator.addRule(new MinLengthRule(3, "viestin pitää olla vähintään 3 merkkiä"));
-                messageValidator.addRule(new MaxLengthRule(2000, "viesti saa olla enintään 2000 merkkiä"));
-                
+                                
                 String error = null;
                                 
-                if(!titleValidator.validate(title)) {
-                    error = titleValidator.getReason();
-                } else if(!messageValidator.validate(text)) {
-                    error = messageValidator.getReason();
+                if(!this.titleValidator.validate(title)) {
+                    error = this.titleValidator.getReason();
+                } else if(!this.messageValidator.validate(text)) {
+                    error = this.messageValidator.getReason();
                 }
                 
                 ses.attribute("thread-title", title);
@@ -269,15 +295,11 @@ public class WebUI implements UI {
                 } catch(Exception e) {
                     return;
                 }
-                
-                Validator messageValidator = new Validator();
-                messageValidator.addRule(new MinLengthRule(3, "viestin pitää olla vähintään 3 merkkiä"));
-                messageValidator.addRule(new MaxLengthRule(2000, "viesti saa olla enintään 2000 merkkiä"));
-                
+                                
                 String error = null;
                                 
-                if(!messageValidator.validate(text)) {
-                    error = messageValidator.getReason();
+                if(!this.messageValidator.validate(text)) {
+                    error = this.messageValidator.getReason();
                 }
                 
                 ses.attribute("message-text", text);
@@ -347,8 +369,6 @@ public class WebUI implements UI {
                 res.redirect(ctx.getLastPage());
             }
         }));
-                
-        get("/uusi-alue", this.viewManager.adminRequiredView("Uusi alue", "uusi-alue"), engine);
         
         post("/kirjaudu", this.viewManager.simple((Context ctx) -> {
             Request req = ctx.getRequest();
@@ -376,28 +396,39 @@ public class WebUI implements UI {
             }
         }));
         
+        get("/uusi-alue", this.viewManager.adminRequiredView("Uusi alue", "uusi-alue"), engine);
+        
         post("/uusi-alue", this.viewManager.adminRequired((Context ctx) -> {
             Request req = ctx.getRequest();
             
             if(req.queryParams("category-ok") != null) {
                 String name = req.queryParams("category-name").trim();
-                
-                Validator nameValidator = new Validator();
-                nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla vähintään 3 merkkiä"));
-                
+                                
                 String error = null;
                 
                 Category o = (Category)this.categoryDao.findOneBy("name", name);
                 
                 if(o != null) {
                     error = "saman nimien alue on jo olemassa";
-                } else if(!nameValidator.validate(name)) {
-                    error = nameValidator.getReason();
+                } else if(!this.categoryNameValidator.validate(name)) {
+                    error = this.categoryNameValidator.getReason();
                 }
                 
                 if(error == null) {
-                    
+                    try {
+                        this.categoryDao.insert(name);
+                    } catch(Exception e) {
+                        error = "tuntematon virhe";
+                    }
                 }
+                
+                if(error != null) {
+                    req.session().attribute("error", "Alueen luominen epäonnistui: " + error);
+                } else {
+                    req.session().attribute("success", "Alueen luominen onnistui");
+                }
+                
+                ctx.getResponse().redirect("/");
             }
         }));
         
@@ -413,11 +444,6 @@ public class WebUI implements UI {
                 
                 req.session().attribute("register-name", name);
                 
-                Validator nameValidator = new Validator();
-                nameValidator.addRule(new MinLengthRule(3, "nimen pitää olla vähintään 3 merkkiä"));
-                nameValidator.addRule(new MaxLengthRule(20, "nimi ei saa olla yli 20 merkkiä pitkä"));
-                nameValidator.addRule(new PatternRule("^[a-zA-Z0-9]+$", "nimi saa sisältää vain kirjaimia ja numeroita"));
-                
                 Validator pwValidator = new Validator();
                 pwValidator.addRule(new MinLengthRule(8, "salasanan pitää olla vähintään 8 merkkiä pitkä"));
                 pwValidator.addRule(new EqualsRule(pw2, "salasanat eivät ole samoja"));
@@ -428,8 +454,8 @@ public class WebUI implements UI {
                 
                 if(o != null) {
                     error = "nimi on jo käytössä";
-                } else if(!nameValidator.validate(name)) {
-                    error = nameValidator.getReason();
+                } else if(!this.userNameValidator.validate(name)) {
+                    error = this.userNameValidator.getReason();
                 } else if(!pwValidator.validate(pw)) {
                     error = pwValidator.getReason();
                 }

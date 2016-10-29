@@ -13,7 +13,7 @@
 {{#messages}}
 <table class="message table">
     <tr>
-        <td class="name">{{user.name}}</td>
+        <td class="name"><a href="{{url '/kayttaja/' user.id}}">{{user.name}}</a></td>
         <td class="sent">{{dt sent}}</td>
     </tr>
     <tr>

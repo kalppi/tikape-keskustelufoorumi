@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,8 +33,9 @@ public class UserDao {
                     String name = rs.getString("name");
                     String pwHash = rs.getString("pw_hash");
                     Boolean admin = rs.getBoolean("admin");
+                    LocalDateTime registered = rs.getTimestamp("registered").toLocalDateTime();
 
-                    User o = new User(id, name, pwHash, admin);
+                    User o = new User(id, name, pwHash, admin, registered);
 
                     return o;
                 }
@@ -57,8 +59,9 @@ public class UserDao {
                     String name = rs.getString("name");
                     String pwHash = rs.getString("pw_hash");
                     Boolean admin = rs.getBoolean("admin");
+                    LocalDateTime registered = rs.getTimestamp("registered").toLocalDateTime();
 
-                    User o = new User(id, name, pwHash, admin);
+                    User o = new User(id, name, pwHash, admin, registered);
 
                     return o;
                 }
@@ -79,8 +82,9 @@ public class UserDao {
                         String name = rs.getString("name");
                         String pwHash = rs.getString("pw_hash");
                         Boolean admin = rs.getBoolean("admin");
+                        LocalDateTime registered = rs.getTimestamp("registered").toLocalDateTime();
 
-                        users.add(new User(id, name, pwHash, admin));
+                        users.add(new User(id, name, pwHash, admin, registered));
                     }
 
                     return users;
@@ -102,8 +106,9 @@ public class UserDao {
                         String name = rs.getString("name");
                         String pwHash = rs.getString("pw_hash");
                         Boolean admin = rs.getBoolean("admin");
+                        LocalDateTime registered = rs.getTimestamp("registered").toLocalDateTime();
 
-                        users.add(new User(id, name, pwHash, admin));
+                        users.add(new User(id, name, pwHash, admin, registered));
                     }
 
                     return users;
@@ -143,8 +148,9 @@ public class UserDao {
                         String name = rs.getString("name");
                         String pwHash = rs.getString("pw_hash");
                         Boolean admin = rs.getBoolean("admin");
+                        LocalDateTime registered = rs.getTimestamp("registered").toLocalDateTime();
 
-                        users.add(new User(id, name, pwHash, admin));
+                        users.add(new User(id, name, pwHash, admin, registered));
                     }
                 }
             }

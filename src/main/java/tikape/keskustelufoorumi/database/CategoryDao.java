@@ -22,6 +22,20 @@ public class CategoryDao {
         this.messageDao = new MessageDao(database);
     }
     
+    public void insert(String name) throws Exception {        
+        try (Connection c = this.database.getConnection()) {
+            try (PreparedStatement s = c.prepareStatement("INSERT INTO Categories (name) VALUES (?)")) {
+                s.setObject(1, name);
+
+                s.execute();
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+            
+            throw e;
+        }
+    }
+    
     public Category findOne(Integer id) {
         return this.findOneBy("id", id);
     }
@@ -71,7 +85,7 @@ public class CategoryDao {
         String sql = "SELECT DISTINCT ON(c.name)"
             + "c.id AS c_id, c.name AS c_name, COUNT(m.id) OVER (PARTITION BY c.id) AS c_message_count, "
             + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
-            + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin, "
+            + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin, u.registered AS u_registered, "
             + "t.id AS t_id "
             + "FROM Categories c "
             + "LEFT JOIN Threads t ON t.category_id = c.id "
@@ -91,6 +105,11 @@ public class CategoryDao {
                         Integer uId = rs.getInt("u_id");
                         String uName = rs.getString("u_name");
                         Boolean uAdmin = rs.getBoolean("u_admin");
+                        LocalDateTime uRegistered = null;
+                        
+                        if(uId != 0) {
+                            uRegistered = rs.getTimestamp("u_registered").toLocalDateTime();
+                        }
 
                         Integer tId = rs.getInt("t_id");
 
@@ -102,7 +121,7 @@ public class CategoryDao {
                             sent = rs.getTimestamp("m_sent").toLocalDateTime();
                         }
 
-                        User user = new User(uId, uName, null, uAdmin);
+                        User user = new User(uId, uName, null, uAdmin, uRegistered);
                         Message message = new Message(mId, user, tId, sent, null);
                         Category category = new Category(cId, cName, cMessageCount, message);
 

@@ -83,74 +83,11 @@ public class ThreadDao {
     
     public List<Thread> findAllBy(String key, Object value, Integer start, Integer limit) {
         List<Thread> threads = new ArrayList();
-        
-        /*
-        
-        // vanha
-        
-        SELECT * FROM (
-        SELECT DISTINCT ON (t.id) 
-        t.id AS t_id, t.category_id AS t_category_id, t.title AS t_title, COUNT(m.id) OVER (PARTITION BY t.id) AS t_message_count, 
-        m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, 
-        u.id AS u_id, u.name AS u_name, u.admin AS u_admin 
-        FROM Threads t 
-        LEFT JOIN Messages m ON t.id = m.thread_id 
-        LEFT JOIN Users u ON u.id = m.user_id 
-        WHERE t.category_id = 1
-        GROUP BY t.id, m.id, u.id 
-        ORDER BY t.id ASC, m.sent DESC
-        ) q ORDER BY m_sent DESC 
-
-        
-        // uusi... i have created a monster
-        
-        SELECT DISTINCT ON(t.id, m.last_sent)
-        t.id AS t_id, t.title AS t_title, t.category_id AS t_category_id, t.title AS t_title, COUNT(m2.id) OVER (PARTITION BY t.id) AS t_message_count,
-        m.first_id AS m_first_id, m.first_sent AT TIME ZONE 'Europe/Helsinki' AS m_first_sent, m.last_id AS m_last_id, m.last_sent AT TIME ZONE 'Europe/Helsinki' AS m_last_sent,
-        uf.id AS u_first_id, ul.id AS u_last_id, uf.name AS u_first_name, ul.name AS u_last_name, uf.admin AS u_first_admin, ul.admin AS u_last_admin
-        FROM Threads t
-        INNER JOIN (
-                SELECT
-                        thread_id,
-                        first_value(user_id) OVER w1 AS first_user_id,
-                        first_value(id) OVER w1 AS first_id,
-                        first_value(sent) OVER w1 AS first_sent,
-                        first_value(user_id) OVER w2 AS last_user_id,
-                        first_value(id) OVER w2 AS last_id,
-                        first_value(sent) OVER w2 AS last_sent
-                FROM Messages
-                WINDOW
-                        w1 AS (PARTITION BY thread_id ORDER BY sent ASC),
-                        w2 AS (PARTITION BY thread_id ORDER BY sent DESC)
-        ) m ON t.id = m.thread_id
-        INNER JOIN Messages m2 ON t.id = m2.thread_id
-        INNER JOIN Users uf ON uf.id = m.first_user_id
-        INNER JOIN Users ul ON ul.id = m.last_user_id
-        WHERE t.category_id = 1
-        GROUP BY t.id, m2.id, m.thread_id, m.first_id, m.last_id, m.first_sent, m.last_sent, uf.id, ul.id
-        ORDER BY m.last_sent DESC
-        LIMIT 5 OFFSET 0
-        
-        */
-        
-        /*String sql = "SELECT * FROM ("
-                + "SELECT DISTINCT ON (t.id) "
-                + "t.id AS t_id, t.category_id AS t_category_id, t.title AS t_title, COUNT(m.id) OVER (PARTITION BY t.id) AS t_message_count, "
-                + "m.id AS m_id, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, "
-                + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin "
-                + "FROM Threads t "
-                + "LEFT JOIN Messages m ON t.id = m.thread_id "
-                + "LEFT JOIN Users u ON u.id = m.user_id "
-                + "WHERE t." + key + " = ? "
-                + "GROUP BY t.id, m.id, u.id "
-                + "ORDER BY t.id ASC, m.sent DESC"
-                + ") q ORDER BY m_sent DESC "
-                + "LIMIT " + limit + " OFFSET " + start;*/
-        
+                
         String sql = "SELECT DISTINCT ON(t.id, m.last_sent)\n" +
 "        t.id AS t_id, t.title AS t_title, t.category_id AS t_category_id, t.title AS t_title, COUNT(m2.id) OVER (PARTITION BY t.id) AS t_message_count,\n" +
 "        m.first_id AS m_first_id, m.first_sent AT TIME ZONE 'Europe/Helsinki' AS m_first_sent, m.last_id AS m_last_id, m.last_sent AT TIME ZONE 'Europe/Helsinki' AS m_last_sent,\n" +
-"        uf.id AS u_first_id, ul.id AS u_last_id, uf.name AS u_first_name, ul.name AS u_last_name, uf.admin AS u_first_admin, ul.admin AS u_last_admin\n" +
+"        uf.id AS u_first_id, ul.id AS u_last_id, uf.name AS u_first_name, ul.name AS u_last_name, uf.admin AS u_first_admin, ul.admin AS u_last_admin, uf.registered AS u_first_registered, ul.registered AS u_last_registered \n" +
 "        FROM Threads t\n" +
 "        INNER JOIN (\n" +
 "                SELECT\n" +
@@ -183,10 +120,12 @@ public class ThreadDao {
                         Integer uFirstId = rs.getInt("u_first_id");
                         String uFirstName = rs.getString("u_first_name");
                         Boolean uFirstAdmin = rs.getBoolean("u_first_admin");
+                        LocalDateTime uFirstRegistered = rs.getTimestamp("u_first_registered").toLocalDateTime();
                         
                         Integer uLastId = rs.getInt("u_last_id");
                         String uLastName = rs.getString("u_last_name");
                         Boolean uLastAdmin = rs.getBoolean("u_last_admin");
+                        LocalDateTime uLastRegistered = rs.getTimestamp("u_last_registered").toLocalDateTime();
 
                         Integer tId = rs.getInt("t_id");
                         
@@ -200,8 +139,8 @@ public class ThreadDao {
                         String title = rs.getString("t_title");
                         Integer messageCount = rs.getInt("t_message_count");
 
-                        User firstUser = new User(uFirstId, uFirstName, null, uFirstAdmin);
-                        User lastUser = new User(uLastId, uLastName, null, uLastAdmin);
+                        User firstUser = new User(uFirstId, uFirstName, null, uFirstAdmin, uFirstRegistered);
+                        User lastUser = new User(uLastId, uLastName, null, uLastAdmin, uLastRegistered);
                         
                         Message firstMessage = new Message(mFirstId, firstUser, tId, mFirstSent, null);
                         Message latestMessage = new Message(mLastId, lastUser, tId, mLastSent, null);

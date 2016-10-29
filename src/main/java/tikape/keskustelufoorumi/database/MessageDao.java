@@ -20,12 +20,12 @@ public class MessageDao {
         this.database = database;
         this.userDao = new UserDao(this.database);
     }
-    
+        
     public List<Message> findAllBy(String key, Object value, Integer start, Integer limit) {
         List<Message> messages = new ArrayList();
         String sql = "SELECT "
                 + "m.id AS m_id, m.text AS m_text, m.sent AT TIME ZONE 'Europe/Helsinki' AS m_sent, m.thread_id AS m_thread_id, "
-                + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin "
+                + "u.id AS u_id, u.name AS u_name, u.admin AS u_admin, u.registered AS u_registered "
                 + "FROM Messages m "
                 + "LEFT JOIN Users u ON u.id = m.user_id "
                 + "WHERE m." + key + " = ? "
@@ -46,8 +46,9 @@ public class MessageDao {
                         Integer uId = rs.getInt("u_id");
                         String uName = rs.getString("u_name");
                         Boolean uAdmin = rs.getBoolean("u_admin");
+                        LocalDateTime uRegistered = rs.getTimestamp("u_registered").toLocalDateTime();
 
-                        User user = new User(uId, uName, null, uAdmin);
+                        User user = new User(uId, uName, null, uAdmin, uRegistered);
                         Message message = new Message(mId, user, mThreadId, mSent, mText);
 
                         messages.add(message);

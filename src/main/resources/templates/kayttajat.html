@@ -2,9 +2,9 @@
 
 <h2>Kayttäjät</h2>
 
-<ul>
+<ul id="users">
 {{#users}}
-<li>{{name}}</li>
+<li><a href="{{url '/kayttaja/' id}}">{{name}}</a></li>
 {{/users}}
 </ul>
 
