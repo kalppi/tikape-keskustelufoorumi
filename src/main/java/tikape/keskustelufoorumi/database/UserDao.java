@@ -99,7 +99,10 @@ public class UserDao {
         List<User> users = new ArrayList<>();
         
         try (Connection c = this.database.getConnection()) {
-            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Users ORDER BY id ASC LIMIT " + limit + " OFFSET " + start)) {
+            try (PreparedStatement s = c.prepareStatement("SELECT * FROM Users ORDER BY id ASC LIMIT ? OFFSET ?")) {
+                s.setObject(1, limit);
+                s.setObject(2, start);
+                
                 try (ResultSet rs = s.executeQuery()) {
                     while(rs.next()) {
                         Integer id = rs.getInt("id");

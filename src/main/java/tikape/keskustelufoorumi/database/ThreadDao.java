@@ -109,11 +109,13 @@ public class ThreadDao {
 "        WHERE t." + key + " = ?\n" +
 "        GROUP BY t.id, m2.id, m.thread_id, m.first_id, m.last_id, m.first_sent, m.last_sent, uf.id, ul.id\n" +
 "        ORDER BY m.last_sent DESC\n" +
-"        LIMIT " + limit + " OFFSET " + start;
+"        LIMIT ? OFFSET ?";
         
         try (Connection c = this.database.getConnection()) {
             try (PreparedStatement s = c.prepareStatement(sql)) {
                 s.setObject(1, value);
+                s.setObject(2, limit);
+                s.setObject(3, start);
 
                 try (ResultSet rs = s.executeQuery()) {
                     while(rs.next()) {
