@@ -203,6 +203,11 @@ public class WebUI implements UI {
             Integer id = extractId(req.params(":id"));
                     
             Category cat = this.categoryDao.findOne(id);
+            
+            if(cat == null) {
+                return;
+            }
+            
             List<tikape.keskustelufoorumi.domain.Thread> threads = this.threadDao.findAllBy("category_id", id, (page - 1) * this.THREADS_IN_PAGE, this.THREADS_IN_PAGE);
             
             Integer pages = (int)Math.ceil(this.threadDao.countBy("category_id", cat.getId()) / (double)this.THREADS_IN_PAGE);
@@ -328,6 +333,11 @@ public class WebUI implements UI {
             Integer id = extractId(req.params(":id"));
             
             tikape.keskustelufoorumi.domain.Thread thread = this.threadDao.findOne(id);
+            
+            if(thread == null) {
+                return;
+            }
+            
             Category category = this.categoryDao.findOne(thread.getCategory_id());
             List<Message> messages = this.messageDao.findAllBy("thread_id", id, (page - 1) * this.THREADS_IN_PAGE, this.THREADS_IN_PAGE);
             
